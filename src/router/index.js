@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import LibraryView from "../views/LibraryView.vue";
 import TrackerView from "../views/TrackerView.vue";
-import WishlistView from "../../views/WishlistView.vue";
+import WishlistView from "../views/WishlistView.vue";
 
 const routes = [
   { path: "/", redirect: "/library" },
