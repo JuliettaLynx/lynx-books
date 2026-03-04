@@ -1,25 +1,29 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div
+    class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+  >
     <!-- Шапка -->
-    <div class="sticky top-0 bg-white z-10 border-b">
+    <div
+      class="sticky top-0 bg-white dark:bg-gray-800 z-10 border-b dark:border-gray-700 transition-colors duration-200"
+    >
       <div class="p-4">
         <div class="flex justify-between items-center">
-          <h1 class="text-2xl font-bold">Библиотека</h1>
+          <h1 class="text-2xl font-bold dark:text-white">Библиотека</h1>
           <div class="flex gap-2">
-            <!-- Кнопка сортировки (только иконка) -->
+            <!-- Кнопка сортировки -->
             <IconButton
               :icon="sortIcon"
               :variant="'primary'"
               @click="cycleSortMode"
-              class="text-xl"
+              class="text-xl dark:text-gray-300"
             />
 
-            <!-- Кнопка фильтра (только иконка) -->
+            <!-- Кнопка фильтра -->
             <IconButton
               :icon="filterIcon"
               :variant="'primary'"
               @click="cycleFilterMode"
-              class="text-xl"
+              class="text-xl dark:text-gray-300"
             />
 
             <!-- Кнопка переключения режима отображения -->
@@ -27,8 +31,11 @@
               :icon="viewMode === 'grid' ? '⊞' : '☰'"
               :variant="'primary'"
               @click="toggleViewMode"
-              class="text-xl"
+              class="text-xl dark:text-gray-300"
             />
+
+            <!-- Кнопка переключения темы -->
+            <ThemeToggle />
           </div>
         </div>
 
@@ -79,7 +86,7 @@
     <IconButton
       icon="+"
       variant="primary"
-      class="fixed right-4 bottom-20 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 text-2xl flex items-center justify-center"
+      class="fixed right-4 bottom-20 w-14 h-14 bg-blue-600 dark:bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-2xl flex items-center justify-center transition-colors duration-200"
       @click="openModal"
     />
 
@@ -95,6 +102,7 @@ import IconButton from "../components/IconButton.vue";
 import SearchInput from "../components/SearchInput.vue";
 import BookCard from "../components/BookCard.vue";
 import BookModal from "../components/BookModal.vue";
+import ThemeToggle from "../components/ThemeToggle.vue";
 
 // Состояние
 const viewMode = ref("grid"); // 'grid' или 'tile'
