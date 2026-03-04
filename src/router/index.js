@@ -4,6 +4,7 @@ import TrackerView from "../views/TrackerView.vue";
 import WishlistView from "../views/WishlistView.vue";
 
 const routes = [
+  { path: "/", redirect: "/library" },
   { path: "/library", component: LibraryView },
   { path: "/tracker", component: TrackerView },
   { path: "/wishlist", component: WishlistView },
