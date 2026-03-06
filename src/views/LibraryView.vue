@@ -48,19 +48,32 @@
       </div>
     </div>
 
-    <!-- Список книг -->
-    <div class="p-4">
-      <div v-if="loading" class="text-center py-8">
-        <div class="inline-block text-2xl">⌛</div>
-        <p class="text-gray-500 mt-2">Загрузка...</p>
-      </div>
+    <!-- Индикатор загрузки или ошибка -->
+    <div v-if="libraryStore.loading" class="p-4 text-center">
+      <div class="inline-block text-2xl animate-spin">⌛</div>
+      <p class="text-gray-500 dark:text-gray-400 mt-2">Загрузка...</p>
+    </div>
 
-      <div v-else-if="filteredBooks.length === 0" class="text-center py-8">
+    <div v-else-if="libraryStore.error" class="p-4 text-center">
+      <p class="text-red-500 dark:text-red-400">
+        Ошибка: {{ libraryStore.error }}
+      </p>
+      <button
+        @click="libraryStore.loadBooks"
+        class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+      >
+        Повторить
+      </button>
+    </div>
+
+    <!-- Список книг -->
+    <div v-else class="p-4">
+      <div v-if="filteredBooks.length === 0" class="text-center py-8">
         <span class="text-6xl mb-4 block">📚</span>
-        <p class="text-gray-500">Книги не найдены</p>
-        <p class="text-sm text-gray-400 mt-2">
+        <p class="text-gray-500 dark:text-gray-400">Книги не найдены</p>
+        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">
           {{
-            books.length === 0
+            libraryStore.books.length === 0
               ? "Добавьте первую книгу"
               : "Попробуйте изменить параметры поиска"
           }}
@@ -80,7 +93,7 @@
           :book="book"
           :is-grid="viewMode === 'grid'"
           @edit="openEditModal"
-          @favorite="toggleFavorite"
+          @favorite="handleToggleFavorite"
           @delete="handleDelete"
         />
       </div>
@@ -105,15 +118,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useDebounceFn } from "@vueuse/core";
+import { useLibraryStore } from "../stores/library";
 import IconButton from "../components/IconButton.vue";
 import SearchInput from "../components/SearchInput.vue";
 import BookCard from "../components/BookCard.vue";
 import BookModal from "../components/BookModal.vue";
 import ThemeToggle from "../components/ThemeToggle.vue";
 
-// Состояние
+const libraryStore = useLibraryStore();
+
+// Состояние UI
 const viewMode = ref("grid"); // 'grid' или 'tile'
 const searchQuery = ref("");
 const debouncedSearch = ref("");
@@ -121,7 +137,11 @@ const sortMode = ref(0); // 0: название А-Я, 1: название Я-А
 const filterMode = ref(0); // 0: все, 1: избранные, 2: прочитано, 3: не прочитано, 4: брошено
 const isModalOpen = ref(false);
 const editingBook = ref(null);
-const loading = ref(false);
+
+// Загружаем книги при монтировании компонента
+onMounted(() => {
+  libraryStore.loadBooks();
+});
 
 // Иконки для сортировки
 const sortIcons = ["🔤↑", "🔤↓", "👤↑", "👤↓"];
@@ -132,13 +152,13 @@ const filterIcons = ["📚", "⭐", "✅", "📖", "❌"];
 const filterIcon = computed(() => filterIcons[filterMode.value]);
 
 // Методы управления модалкой
-const openAddModal = () => {
+const openModal = () => {
   editingBook.value = null;
   isModalOpen.value = true;
 };
 
 const openEditModal = (book) => {
-  editingBook.value = { ...book }; // Копируем, чтобы не менять оригинал до сохранения
+  editingBook.value = { ...book };
   isModalOpen.value = true;
 };
 
@@ -147,19 +167,19 @@ const closeModal = () => {
   editingBook.value = null;
 };
 
-// Метод для переключения режима отображения
+// Переключение режима отображения
 const toggleViewMode = () => {
   viewMode.value = viewMode.value === "grid" ? "tile" : "grid";
 };
 
 // Циклическое переключение сортировки
 const cycleSortMode = () => {
-  sortMode.value = (sortMode.value + 1) % 4; // 4 режима сортировки
+  sortMode.value = (sortMode.value + 1) % 4;
 };
 
 // Циклическое переключение фильтра
 const cycleFilterMode = () => {
-  filterMode.value = (filterMode.value + 1) % 5; // 5 режимов фильтра
+  filterMode.value = (filterMode.value + 1) % 5;
 };
 
 // Debounce для поиска
@@ -171,97 +191,9 @@ watch(searchQuery, (value) => {
   updateDebouncedSearch(value);
 });
 
-// Тестовые данные
-const books = ref([
-  {
-    id: 1,
-    title: "Война и мир",
-    author: "Лев Толстой",
-    format: "📄",
-    status: "прочитано",
-    rating: 5,
-    isFavorite: true,
-  },
-  {
-    id: 2,
-    title: "Преступление и наказание",
-    author: "Фёдор Достоевский",
-    format: "📱",
-    status: "не прочитано",
-    isFavorite: false,
-  },
-  {
-    id: 3,
-    title: "Мастер и Маргарита",
-    author: "Михаил Булгаков",
-    format: "📄",
-    status: "не прочитано",
-    isFavorite: false,
-  },
-  {
-    id: 4,
-    title: "1984",
-    author: "Джордж Оруэлл",
-    format: "📱",
-    status: "прочитано",
-    rating: 4,
-    isFavorite: true,
-  },
-  {
-    id: 5,
-    title: "Улисс",
-    author: "Джеймс Джойс",
-    format: "📄",
-    status: "брошено",
-    isFavorite: false,
-  },
-  {
-    id: 6,
-    title: "Анна Каренина",
-    author: "Лев Толстой",
-    format: "📄",
-    status: "прочитано",
-    rating: 5,
-    isFavorite: true,
-  },
-  {
-    id: 7,
-    title: "Идиот",
-    author: "Фёдор Достоевский",
-    format: "📱",
-    status: "не прочитано",
-    isFavorite: false,
-  },
-  {
-    id: 8,
-    title: "Собачье сердце",
-    author: "Михаил Булгаков",
-    format: "📄",
-    status: "прочитано",
-    rating: 5,
-    isFavorite: false,
-  },
-  {
-    id: 9,
-    title: "Скотный двор",
-    author: "Джордж Оруэлл",
-    format: "📱",
-    status: "не прочитано",
-    isFavorite: false,
-  },
-  {
-    id: 10,
-    title: "Портрет художника в юности",
-    author: "Джеймс Джойс",
-    format: "📱",
-    status: "брошено",
-    isFavorite: false,
-  },
-]);
-
 // Применение фильтра
 const filteredByStatus = computed(() => {
-  let filtered = [...books.value];
+  let filtered = [...libraryStore.books];
 
   switch (filterMode.value) {
     case 1: // избранные
@@ -278,7 +210,6 @@ const filteredByStatus = computed(() => {
       break;
     case 0: // все
     default:
-      // все книги
       break;
   }
 
@@ -319,40 +250,25 @@ const filteredBooks = computed(() => {
   return sorted;
 });
 
-const toggleFavorite = (book) => {
-  book.isFavorite = !book.isFavorite;
+// Обработчики действий с книгами
+const handleToggleFavorite = async (book) => {
+  await libraryStore.toggleFavorite(book);
 };
 
-const handleDelete = (book) => {
+const handleDelete = async (book) => {
   if (confirm(`Удалить книгу "${book.title}"?`)) {
-    books.value = books.value.filter((b) => b.id !== book.id);
+    await libraryStore.deleteBook(book.id);
   }
 };
 
 // Сохранение книги
-const saveBook = (bookData) => {
+const saveBook = async (bookData) => {
   if (bookData.id) {
-    // Редактирование - заменяем всю книгу
-    const index = books.value.findIndex((b) => b.id === bookData.id);
-    if (index !== -1) {
-      books.value[index] = bookData;
-    }
+    // Редактирование
+    await libraryStore.updateBook(bookData.id, bookData);
   } else {
     // Добавление
-    const newBook = {
-      ...bookData,
-      id: Date.now(), // Простой способ генерации id
-    };
-    books.value.push(newBook);
+    await libraryStore.addBook(bookData);
   }
 };
-
-const openModal = () => {
-  isModalOpen.value = true;
-};
-
-// Имитация загрузки
-setTimeout(() => {
-  loading.value = false;
-}, 500);
 </script>
