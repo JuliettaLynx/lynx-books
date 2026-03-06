@@ -16,6 +16,20 @@
   </head>
   <body>
     <div id="app"></div>
+
+    <script>
+      (function () {
+        const redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+
+        if (redirect && redirect !== location.pathname) {
+          const basePath = "/LynxBooks";
+          const redirectPath = redirect.replace(basePath, "");
+          history.replaceState(null, null, basePath + redirectPath);
+        }
+      })();
+    </script>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

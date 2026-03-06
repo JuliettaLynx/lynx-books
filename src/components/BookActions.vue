@@ -1,5 +1,5 @@
 <template>
-  <div class="relative" @click.stop>
+  <div class="relative" @click.stop v-click-outside="closeMenu">
     <!-- Кнопка трёх точек (только для плитки) -->
     <button
       v-if="!isGrid"
@@ -63,6 +63,22 @@
 <script setup>
 import { ref } from "vue";
 
+// Директива для отслеживания кликов вне элемента
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = function (event) {
+      // Проверяем, был ли клик вне элемента и его дочерних элементов
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event);
+      }
+    };
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
+};
+
 const props = defineProps({
   book: {
     type: Object,
@@ -80,6 +96,10 @@ const isOpen = ref(false);
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
+};
+
+const closeMenu = () => {
+  isOpen.value = false;
 };
 
 const handleAction = (action) => {

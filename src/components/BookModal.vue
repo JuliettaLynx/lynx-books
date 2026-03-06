@@ -40,7 +40,7 @@
               </span>
             </div>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Поиск по Google Books API появится позже
+              Поиск появится позже
             </p>
           </div>
 
@@ -155,7 +155,7 @@
             </label>
             <div class="flex gap-2 flex-wrap">
               <label
-                class="flex-1 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+                class="flex-1 px-1.5 py-2 rounded-lg border cursor-pointer transition-colors"
                 :class="[
                   form.status === 'не прочитано'
                     ? 'bg-yellow-100 border-yellow-300 dark:bg-yellow-900 dark:border-yellow-700'
@@ -174,7 +174,7 @@
               </label>
 
               <label
-                class="flex-1 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+                class="flex-1 px-1.5 py-2 rounded-lg border cursor-pointer transition-colors"
                 :class="[
                   form.status === 'прочитано'
                     ? 'bg-green-100 border-green-300 dark:bg-green-900 dark:border-green-700'
@@ -193,7 +193,7 @@
               </label>
 
               <label
-                class="flex-1 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+                class="flex-1 px-1.5 py-2 rounded-lg border cursor-pointer transition-colors"
                 :class="[
                   form.status === 'брошено'
                     ? 'bg-red-100 border-red-300 dark:bg-red-900 dark:border-red-700'

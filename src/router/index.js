@@ -2,12 +2,14 @@ import { createRouter, createWebHistory } from "vue-router";
 import LibraryView from "../views/LibraryView.vue";
 import TrackerView from "../views/TrackerView.vue";
 import WishlistView from "../views/WishlistView.vue";
+import NotFound from "../views/404.vue";
 
 const routes = [
   { path: "/", redirect: "/library" },
   { path: "/library", component: LibraryView },
   { path: "/tracker", component: TrackerView },
   { path: "/wishlist", component: WishlistView },
+  { path: "/:pathMatch(.*)*", component: NotFound },
 ];
 
 const router = createRouter({

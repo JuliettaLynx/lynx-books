@@ -4,7 +4,7 @@
   >
     <!-- Шапка -->
     <div
-      class="sticky top-0 bg-white dark:bg-gray-800 z-10 border-b dark:border-gray-700 transition-colors duration-200"
+      class="sticky top-0 bg-white dark:bg-gray-800 z-20 border-b dark:border-gray-700 transition-colors duration-200"
     >
       <div class="p-4">
         <div class="flex justify-between items-center">
@@ -51,7 +51,7 @@
     <!-- Список книг -->
     <div class="p-4">
       <div v-if="loading" class="text-center py-8">
-        <div class="inline-block animate-spin text-2xl">⌛</div>
+        <div class="inline-block text-2xl">⌛</div>
         <p class="text-gray-500 mt-2">Загрузка...</p>
       </div>
 
@@ -90,7 +90,7 @@
     <IconButton
       icon="+"
       variant="primary"
-      class="fixed right-4 bottom-20 w-14 h-14 bg-blue-600 dark:bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-2xl flex items-center justify-center transition-colors duration-200"
+      class="fixed z-20 right-4 bottom-20 w-14 h-14 bg-blue-600 dark:bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 text-2xl flex items-center justify-center transition-colors duration-200"
       @click="openModal"
     />
 
