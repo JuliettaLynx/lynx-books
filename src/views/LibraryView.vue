@@ -1,15 +1,15 @@
 <template>
   <div
-    class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+    class="min-h-screen bg-gray-200 dark:bg-gray-900 transition-colors duration-200"
   >
     <!-- Шапка -->
     <div
-      class="sticky top-0 bg-white dark:bg-gray-800 z-20 border-b dark:border-gray-700 transition-colors duration-200"
+      class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-20 border-b dark:border-gray-700 transition-colors duration-200"
     >
       <div class="p-4">
         <div class="flex justify-between items-center">
           <h1 class="text-2xl font-bold dark:text-white">Библиотека</h1>
-          <div class="flex gap-2">
+          <div class="flex gap-1">
             <!-- Кнопка сортировки -->
             <IconButton
               :icon="sortIcon"

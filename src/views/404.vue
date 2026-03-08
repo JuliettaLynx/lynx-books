@@ -3,7 +3,7 @@
   <div
     class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
   >
-    <!-- Шапка как в LibraryView -->
+    <!-- Шапка -->
     <div
       class="sticky top-0 bg-white dark:bg-gray-800 z-20 border-b dark:border-gray-700 transition-colors duration-200"
     >
@@ -41,11 +41,34 @@
             Страница, которую вы ищете, не существует или была перемещена
           </p>
         </div>
+
+        <!-- Кнопки навигации -->
+        <div class="flex flex-wrap gap-3 justify-center mt-8">
+          <IconButton icon="📚" class="px-6 py-3 text-lg" @click="goToLibrary">
+            Библиотека
+          </IconButton>
+
+          <IconButton icon="📊" class="px-6 py-3 text-lg" @click="goToTracker">
+            Трекер
+          </IconButton>
+
+          <IconButton icon="🎁" class="px-6 py-3 text-lg" @click="goToWishlist">
+            В желаемое
+          </IconButton>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
 import ThemeToggle from "../components/ThemeToggle.vue";
+import IconButton from "../components/IconButton.vue";
+
+const router = useRouter();
+
+const goToLibrary = () => router.push("/library");
+const goToTracker = () => router.push("/tracker");
+const goToWishlist = () => router.push("/wishlist");
 </script>
