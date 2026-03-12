@@ -13,7 +13,7 @@
         @keydown.esc="isOpen = false"
         @blur="handleBlur"
         :placeholder="placeholder"
-        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 bg-white dark:bg-gray-700 dark:text-white"
+        class="w-full mt-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 bg-white dark:bg-gray-700 dark:text-white"
       />
 
       <!-- Стрелка вниз -->
@@ -41,18 +41,55 @@
 
     <!-- Выпадающий список -->
     <div
-      v-if="isOpen && filteredPublishers.length > 0"
+      v-if="
+        isOpen && (startsWithResults.length > 0 || containsResults.length > 0)
+      "
       class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
     >
       <ul>
+        <!-- Группа "Начинается с" -->
         <li
-          v-for="(publisher, index) in filteredPublishers"
+          v-if="startsWithResults.length > 0"
+          class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 sticky top-0"
+        >
+          Начинается с "{{ searchQuery }}"
+        </li>
+        <li
+          v-for="(publisher, index) in startsWithResults"
           :key="publisher.id"
           @mousedown.prevent="selectPublisher(publisher.name)"
-          @mouseenter="highlightedIndex = index"
+          @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'starts')"
           :class="[
             'px-4 py-2 cursor-pointer transition-colors',
-            highlightedIndex === index
+            highlightedIndex === getAbsoluteIndex(index, 'starts')
+              ? 'bg-blue-500 text-white'
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700',
+          ]"
+        >
+          {{ publisher.name }}
+        </li>
+
+        <!-- Разделитель, если есть обе группы -->
+        <li
+          v-if="startsWithResults.length > 0 && containsResults.length > 0"
+          class="border-t border-gray-200 dark:border-gray-700 my-1"
+        ></li>
+
+        <!-- Группа "Содержит" -->
+        <li
+          v-if="containsResults.length > 0"
+          class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 sticky top-0"
+        >
+          Содержит "{{ searchQuery }}"
+        </li>
+        <li
+          v-for="(publisher, index) in containsResults"
+          :key="`contains-${publisher.id}`"
+          @mousedown.prevent="selectPublisher(publisher.name)"
+          @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'contains')"
+          :class="[
+            'px-4 py-2 cursor-pointer transition-colors',
+            highlightedIndex === getAbsoluteIndex(index, 'contains')
               ? 'bg-blue-500 text-white'
               : 'hover:bg-gray-100 dark:hover:bg-gray-700',
           ]"
@@ -64,7 +101,12 @@
 
     <!-- Сообщение, если ничего не найдено, но есть введенный текст -->
     <div
-      v-else-if="isOpen && searchQuery && filteredPublishers.length === 0"
+      v-else-if="
+        isOpen &&
+        searchQuery &&
+        startsWithResults.length === 0 &&
+        containsResults.length === 0
+      "
       class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg p-4 text-gray-500 text-center"
     >
       Будет добавлено:
@@ -111,15 +153,63 @@ const selectPublisher = (publisherName) => {
   }, 100);
 };
 
-// Фильтрация издательств по поисковому запросу
+// Фильтрация издательств с сортировкой по группам
 const filteredPublishers = computed(() => {
-  if (!searchQuery.value) return publishersList;
+  if (!searchQuery.value) {
+    return {
+      startsWith: publishersList,
+      contains: [],
+    };
+  }
 
   const query = searchQuery.value.toLowerCase().trim();
-  return publishersList.filter((publisher) =>
-    publisher.name.toLowerCase().includes(query),
+
+  const startsWith = publishersList.filter((publisher) =>
+    publisher.name.toLowerCase().startsWith(query),
   );
+
+  const contains = publishersList.filter((publisher) => {
+    const name = publisher.name.toLowerCase();
+    return name.includes(query) && !name.startsWith(query);
+  });
+
+  // Сортируем каждую группу по алфавиту
+  const sortByName = (a, b) => a.name.localeCompare(b.name);
+
+  return {
+    startsWith: [...startsWith].sort(sortByName),
+    contains: [...contains].sort(sortByName),
+  };
 });
+
+// Вычисляемые свойства для каждой группы
+const startsWithResults = computed(() => filteredPublishers.value.startsWith);
+const containsResults = computed(() => filteredPublishers.value.contains);
+
+// Получение абсолютного индекса для выделения
+const getAbsoluteIndex = (index, group) => {
+  if (group === "starts") {
+    return index;
+  } else {
+    return startsWithResults.value.length + index;
+  }
+};
+
+// Получение элемента по абсолютному индексу
+const getItemByAbsoluteIndex = (index) => {
+  const startsCount = startsWithResults.value.length;
+
+  if (index < startsCount) {
+    return startsWithResults.value[index];
+  } else {
+    return containsResults.value[index - startsCount];
+  }
+};
+
+// Общее количество отфильтрованных элементов
+const totalFilteredCount = computed(
+  () => startsWithResults.value.length + containsResults.value.length,
+);
 
 // Обработка ввода
 const handleInput = () => {
@@ -155,9 +245,9 @@ const selectNext = () => {
     return;
   }
 
-  if (filteredPublishers.value.length > 0) {
+  if (totalFilteredCount.value > 0) {
     highlightedIndex.value =
-      (highlightedIndex.value + 1) % filteredPublishers.value.length;
+      (highlightedIndex.value + 1) % totalFilteredCount.value;
     scrollToHighlighted();
   }
 };
@@ -168,20 +258,22 @@ const selectPrevious = () => {
     return;
   }
 
-  if (filteredPublishers.value.length > 0) {
+  if (totalFilteredCount.value > 0) {
     highlightedIndex.value =
       highlightedIndex.value <= 0
-        ? filteredPublishers.value.length - 1
+        ? totalFilteredCount.value - 1
         : highlightedIndex.value - 1;
     scrollToHighlighted();
   }
 };
 
 const selectCurrent = () => {
-  if (highlightedIndex.value >= 0 && filteredPublishers.value.length > 0) {
-    selectPublisher(filteredPublishers.value[highlightedIndex.value].name);
-  } else if (filteredPublishers.value.length === 1) {
-    selectPublisher(filteredPublishers.value[0].name);
+  if (highlightedIndex.value >= 0 && totalFilteredCount.value > 0) {
+    const selectedItem = getItemByAbsoluteIndex(highlightedIndex.value);
+    selectPublisher(selectedItem.name);
+  } else if (totalFilteredCount.value === 1) {
+    const selectedItem = getItemByAbsoluteIndex(0);
+    selectPublisher(selectedItem.name);
   } else if (searchQuery.value.trim()) {
     const value = searchQuery.value.trim();
     emit("update:modelValue", value);
@@ -227,7 +319,7 @@ watch(
 );
 
 // Сбрасываем подсветку при изменении списка
-watch(filteredPublishers, () => {
+watch([startsWithResults, containsResults], () => {
   highlightedIndex.value = -1;
 });
 
