@@ -142,7 +142,7 @@ const editingBook = ref(null);
 onMounted(() => {
   // Если пользователь вошел, а данные ещё не синхронизированы
   if (auth.currentUser) {
-    libraryStore.loadBooks();
+    libraryStore.initSync(auth.currentUser.uid);
   }
 });
 
@@ -231,7 +231,6 @@ const searched = computed(() => {
   );
 });
 
-// Применение сортировки
 // Применение сортировки
 const filteredBooks = computed(() => {
   const sorted = [...searched.value];

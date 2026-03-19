@@ -10,8 +10,8 @@
         <div class="flex justify-between items-center">
           <h1 class="text-2xl font-bold dark:text-white">Трекер чтения</h1>
 
-          <!-- Кнопка темы -->
-          <ThemeToggle />
+          <!-- Иконка профиля -->
+          <UserProfile />
         </div>
       </div>
     </div>
@@ -26,5 +26,5 @@
 </template>
 
 <script setup>
-import ThemeToggle from "../components/ThemeToggle.vue";
+import UserProfile from "../components/UserProfile.vue";
 </script>

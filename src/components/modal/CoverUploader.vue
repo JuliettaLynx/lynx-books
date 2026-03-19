@@ -161,7 +161,7 @@ const loadOriginalFromDB = async () => {
 
   isLoading.value = true;
   try {
-    const book = await db.books.get(Number(props.bookId));
+    const book = await db.books.get(props.bookId);
     if (book?.originalCover) {
       originalImageSrc.value = book.originalCover;
       emit("update:originalImage", book.originalCover);
@@ -179,7 +179,7 @@ const saveOriginalToDB = async (imageData) => {
   if (!props.bookId) return;
 
   try {
-    await db.books.update(Number(props.bookId), {
+    await db.books.update(props.bookId, {
       originalCover: imageData,
     });
     console.log("Оригинал сохранен в IndexedDB");
@@ -193,7 +193,7 @@ const removeOriginalFromDB = async () => {
   if (!props.bookId) return;
 
   try {
-    await db.books.update(Number(props.bookId), {
+    await db.books.update(props.bookId, {
       originalCover: null,
     });
     console.log("Оригинал удален из IndexedDB");
