@@ -308,7 +308,6 @@
     </Teleport>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
@@ -397,6 +396,7 @@ const loadUserFromDB = async () => {
       if (userData.dailyGoal) {
         dailyGoal.value = userData.dailyGoal;
         userStore.setDailyGoal(userData.dailyGoal);
+        editDailyGoal.value = userData.dailyGoal;
       }
       if (userData.originalAvatar) {
         originalAvatar.value = userData.originalAvatar;
@@ -415,27 +415,23 @@ const saveUserToDB = async (updates) => {
   if (!user.value?.uid) return;
 
   try {
-    await usersDB.update(user.value.uid, {
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    });
-    console.log("Пользователь сохранен в IndexedDB");
-  } catch (error) {
-    // Если записи нет, создаем новую
-    if (
-      error.name === "NotFoundError" ||
-      error.message?.includes("not found")
-    ) {
+    const existing = await usersDB.get(user.value.uid);
+    if (existing) {
+      await usersDB.update(user.value.uid, {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
       await usersDB.add({
         userId: user.value.uid,
-        displayName: user.value.displayName,
         email: user.value.email,
         ...updates,
         createdAt: new Date().toISOString(),
       });
-    } else {
-      console.error("Ошибка сохранения пользователя в IndexedDB:", error);
     }
+    console.log("Пользователь сохранен в IndexedDB");
+  } catch (error) {
+    console.error("Ошибка сохранения пользователя в IndexedDB:", error);
   }
 };
 
@@ -463,7 +459,6 @@ const openSection = (section) => {
 
   if (section === "profile") {
     editDisplayName.value = user.value?.displayName || "";
-    // Загружаем текущий аватар
     avatarPreview.value = userAvatar.value || null;
     originalAvatar.value = null;
     avatarFile.value = null;
@@ -496,17 +491,14 @@ const saveSection = async () => {
   try {
     switch (activeSection.value) {
       case "profile": {
-        const updates = {};
-
         // Обновляем имя в Firebase Auth если изменилось
         if (editDisplayName.value !== user.value?.displayName) {
-          updates.displayName = editDisplayName.value;
           await updateProfile(user.value, {
             displayName: editDisplayName.value,
           });
         }
 
-        // Сохраняем данные в IndexedDB
+        // Сохраняем в IndexedDB
         const dbUpdates = {
           displayName: editDisplayName.value,
         };
