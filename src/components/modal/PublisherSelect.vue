@@ -3,40 +3,20 @@
     <!-- Поле ввода -->
     <div class="relative">
       <input
+        ref="inputRef"
         type="text"
         v-model="searchQuery"
-        @focus="isOpen = true"
+        @focus="handleFocus"
         @input="handleInput"
         @keydown.down.prevent="selectNext"
         @keydown.up.prevent="selectPrevious"
         @keydown.enter.prevent="selectCurrent"
-        @keydown.esc="isOpen = false"
+        @keydown.esc="closeDropdown"
         @blur="handleBlur"
+        @keyup="handleKeyUp"
         :placeholder="placeholder"
         class="w-full mt-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 bg-white dark:bg-gray-700 dark:text-white"
       />
-
-      <!-- Стрелка вниз -->
-      <button
-        @click="toggleDropdown"
-        @mousedown.prevent
-        type="button"
-        class="absolute right-2 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </button>
     </div>
 
     <!-- Выпадающий список -->
@@ -50,7 +30,7 @@
         <!-- Группа "Начинается с" -->
         <li
           v-if="startsWithResults.length > 0"
-          class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 sticky top-0"
+          class="px-4 py-1 text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 sticky top-0"
         >
           Начинается с "{{ searchQuery }}"
         </li>
@@ -60,7 +40,7 @@
           @mousedown.prevent="selectPublisher(publisher.name)"
           @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'starts')"
           :class="[
-            'px-4 py-2 cursor-pointer transition-colors',
+            'px-4 text-sm py-2 cursor-pointer transition-colors',
             highlightedIndex === getAbsoluteIndex(index, 'starts')
               ? 'bg-blue-500 text-white'
               : 'hover:bg-gray-100 dark:hover:bg-gray-700',
@@ -78,7 +58,7 @@
         <!-- Группа "Содержит" -->
         <li
           v-if="containsResults.length > 0"
-          class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 sticky top-0"
+          class="px-4 py-1 text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 sticky top-0"
         >
           Содержит "{{ searchQuery }}"
         </li>
@@ -88,7 +68,7 @@
           @mousedown.prevent="selectPublisher(publisher.name)"
           @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'contains')"
           :class="[
-            'px-4 py-2 cursor-pointer transition-colors',
+            'px-4 py-2 text-sm cursor-pointer transition-colors',
             highlightedIndex === getAbsoluteIndex(index, 'contains')
               ? 'bg-blue-500 text-white'
               : 'hover:bg-gray-100 dark:hover:bg-gray-700',
@@ -107,7 +87,7 @@
         startsWithResults.length === 0 &&
         containsResults.length === 0
       "
-      class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg p-4 text-gray-500 text-center"
+      class="absolute text-sm z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg p-4 text-gray-500 text-center"
     >
       Будет добавлено:
       <span class="font-medium text-blue-500">"{{ searchQuery }}"</span>
@@ -139,8 +119,22 @@ const searchQuery = ref("");
 const isOpen = ref(false);
 const highlightedIndex = ref(-1);
 const isSelecting = ref(false); // Флаг для отслеживания выбора из списка
+const componentRef = ref(null);
 
-// Методы
+// Добавляем обработчик keyup для мобильных
+const handleKeyUp = () => {
+  // Принудительно обновляем список на мобильных
+  nextTick();
+};
+
+const closeDropdown = () => {
+  isOpen.value = false;
+};
+
+const handleFocus = () => {
+  isOpen.value = true;
+};
+
 const selectPublisher = (publisherName) => {
   isSelecting.value = true; // Устанавливаем флаг, что идет выбор из списка
   searchQuery.value = publisherName;
@@ -224,18 +218,18 @@ const handleInput = () => {
 
 // Обработка потери фокуса
 const handleBlur = () => {
-  // Если идет выбор из списка, не делаем ничего
-  if (isSelecting.value) {
-    return;
-  }
+  if (isSelecting.value) return;
 
-  // Сохраняем текущее значение при потере фокуса
-  if (searchQuery.value.trim()) {
-    emit("update:modelValue", searchQuery.value.trim());
-  } else {
-    emit("update:modelValue", null);
-  }
-  isOpen.value = false;
+  setTimeout(() => {
+    if (!isSelecting.value) {
+      if (searchQuery.value.trim()) {
+        emit("update:modelValue", searchQuery.value.trim());
+      } else {
+        emit("update:modelValue", null);
+      }
+      isOpen.value = false;
+    }
+  }, 50);
 };
 
 // Навигация с клавиатуры
@@ -281,14 +275,6 @@ const selectCurrent = () => {
   }
 };
 
-// Переключение дропдауна
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-  if (isOpen.value) {
-    highlightedIndex.value = -1;
-  }
-};
-
 // Скролл к выделенному элементу
 const scrollToHighlighted = () => {
   nextTick(() => {
@@ -304,7 +290,8 @@ const scrollToHighlighted = () => {
 
 // Закрытие списка при клике вне компонента
 const handleClickOutside = (event) => {
-  if (!event.target.closest(".relative")) {
+  if (!componentRef.value || !isOpen.value) return;
+  if (!componentRef.value.contains(event.target)) {
     isOpen.value = false;
   }
 };
@@ -331,3 +318,12 @@ onUnmounted(() => {
   document.removeEventListener("mousedown", handleClickOutside);
 });
 </script>
+
+<style scoped>
+/* Улучшение производительности на мобильных */
+@media (max-width: 768px) {
+  .absolute {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+</style>

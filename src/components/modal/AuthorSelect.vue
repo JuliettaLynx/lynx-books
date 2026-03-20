@@ -3,40 +3,20 @@
     <!-- Поле ввода -->
     <div class="relative">
       <input
+        ref="inputRef"
         type="text"
         v-model="searchQuery"
-        @focus="isOpen = true"
+        @focus="handleFocus"
         @input="handleInput"
         @keydown.down.prevent="selectNext"
         @keydown.up.prevent="selectPrevious"
         @keydown.enter.prevent="selectCurrent"
-        @keydown.esc="isOpen = false"
+        @keydown.esc="closeDropdown"
         @blur="handleBlur"
+        @keyup="handleKeyUp"
         :placeholder="placeholder"
-        class="w-full mt-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 bg-white dark:bg-gray-700 dark:text-white"
+        class="w-full text-sm mt-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 bg-white dark:bg-gray-700 dark:text-white"
       />
-
-      <!-- Стрелка вниз -->
-      <button
-        @click="toggleDropdown"
-        @mousedown.prevent
-        type="button"
-        class="absolute right-2 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </button>
     </div>
 
     <!-- Выпадающий список -->
@@ -44,7 +24,7 @@
       v-if="
         isOpen && (startsWithResults.length > 0 || containsResults.length > 0)
       "
-      class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+      class="absolute text-sm z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
     >
       <ul>
         <!-- Группа "Начинается с" -->
@@ -60,7 +40,7 @@
           @mousedown.prevent="selectAuthor(author.originalName)"
           @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'starts')"
           :class="[
-            'px-4 py-2 cursor-pointer transition-colors',
+            'px-4 py-2 cursor-pointer text-sm transition-colors',
             highlightedIndex === getAbsoluteIndex(index, 'starts')
               ? 'bg-blue-500 text-white'
               : 'hover:bg-gray-100 dark:hover:bg-gray-700',
@@ -88,7 +68,7 @@
           @mousedown.prevent="selectAuthor(author.originalName)"
           @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'contains')"
           :class="[
-            'px-4 py-2 cursor-pointer transition-colors',
+            'px-4 py-2 text-sm cursor-pointer transition-colors',
             highlightedIndex === getAbsoluteIndex(index, 'contains')
               ? 'bg-blue-500 text-white'
               : 'hover:bg-gray-100 dark:hover:bg-gray-700',
@@ -107,7 +87,7 @@
         startsWithResults.length === 0 &&
         containsResults.length === 0
       "
-      class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg p-4 text-gray-500 text-center"
+      class="absolute text-sm z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg p-4 text-gray-500 text-center"
     >
       Будет добавлено:
       <span class="font-medium text-blue-500">"{{ searchQuery }}"</span>
@@ -139,6 +119,21 @@ const searchQuery = ref("");
 const isOpen = ref(false);
 const highlightedIndex = ref(-1);
 const isSelecting = ref(false);
+const componentRef = ref(null);
+
+// Добавляем обработчик keyup для мобильных
+const handleKeyUp = () => {
+  // Принудительно обновляем список на мобильных
+  nextTick();
+};
+
+const closeDropdown = () => {
+  isOpen.value = false;
+};
+
+const handleFocus = () => {
+  isOpen.value = true;
+};
 
 // Функция для генерации вариантов имени
 const generateNameVariants = (fullName) => {
@@ -386,3 +381,12 @@ onUnmounted(() => {
   document.removeEventListener("mousedown", handleClickOutside);
 });
 </script>
+
+<style scoped>
+/* Улучшение производительности на мобильных */
+@media (max-width: 768px) {
+  .absolute {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+</style>

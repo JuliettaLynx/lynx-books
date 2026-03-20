@@ -58,7 +58,7 @@
               @click="uploadNewImage"
               class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
-              Загрузить другое изображение
+              Загрузить изображение
             </button>
           </div>
 

@@ -14,7 +14,7 @@
           class="mr-2"
           @change="$emit('update:modelValue', 'бумажная')"
         />
-        <span class="dark:text-gray-300">Бумажная</span>
+        <span class="text-sm dark:text-gray-300">Бумажная</span>
       </label>
 
       <label class="flex items-center">
@@ -25,7 +25,7 @@
           class="mr-2"
           @change="$emit('update:modelValue', 'электронная')"
         />
-        <span class="dark:text-gray-300">Электронная</span>
+        <span class="text-sm dark:text-gray-300">Электронная</span>
       </label>
 
       <label class="flex items-center">
@@ -36,7 +36,7 @@
           class="mr-2"
           @change="$emit('update:modelValue', 'аудиокнига')"
         />
-        <span class="dark:text-gray-300">Аудио</span>
+        <span class="text-sm dark:text-gray-300">Аудио</span>
       </label>
     </div>
   </div>
@@ -49,3 +49,10 @@ defineProps({
 
 defineEmits(["update:modelValue"]);
 </script>
+
+<style scoped>
+.text-13 {
+  font-size: 0.8rem;
+  line-height: 1rem;
+}
+</style>

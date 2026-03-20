@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-gray-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden dark:text-gray-200 relative"
+    class="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden dark:text-gray-200 relative"
     :class="[isGrid ? 'flex' : '']"
   >
     <!-- Три точки (только для плитки) - поверх обложки  -->

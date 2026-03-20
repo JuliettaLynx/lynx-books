@@ -15,7 +15,6 @@ import {
   getDoc,
   writeBatch,
   serverTimestamp,
-  limit,
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
 
@@ -27,7 +26,6 @@ export const useLibraryStore = defineStore("library", () => {
   const lastSyncTime = ref(null);
 
   let unsubscribeBooks = null;
-  let networkListener = null;
 
   // Очистка при логауте
   const cleanup = () => {
