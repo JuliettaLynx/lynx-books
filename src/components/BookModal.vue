@@ -52,6 +52,7 @@
 
 <script setup>
 import { ref, reactive, watch, onUnmounted } from "vue";
+import { useModalScrollLock } from "../composables/useModalScrollLock";
 import ModalHeader from "./modal/ModalHeader.vue";
 import ModalActions from "./modal/ModalActions.vue";
 import CoverUploader from "./modal/CoverUploader.vue";
@@ -148,6 +149,9 @@ watch(
   { immediate: true },
 );
 
+useModalScrollLock(() => props.isOpen);
+
+/*
 // Блокировка скролла
 watch(
   () => props.isOpen,
@@ -159,7 +163,7 @@ watch(
     }
   },
 );
-
+*/
 // Закрытие модалки
 const handleClose = () => {
   resetForm();
@@ -195,8 +199,9 @@ const removeCover = () => {
   coverFile.value = null;
   originalCover.value = null;
 };
-
+/*
 onUnmounted(() => {
   document.body.classList.remove("modal-open");
 });
+*/
 </script>

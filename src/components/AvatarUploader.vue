@@ -165,6 +165,72 @@ const resizeImageConfig = {
 const MAX_SIZE = 5 * 1024 * 1024; // 5 МБ
 const TARGET_SIZE = { width: 200, height: 200 };
 
+// Функция для проверки/создания записи пользователя
+const ensureUserExists = async () => {
+  if (!props.userId) return false;
+
+  try {
+    const existing = await usersDB.get(props.userId);
+    if (!existing) {
+      console.log("Создаем новую запись пользователя в IndexedDB");
+      await usersDB.add({
+        userId: props.userId,
+        displayName: props.displayName || "",
+        email: props.email || "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    return true;
+  } catch (error) {
+    console.error("Ошибка при проверке пользователя:", error);
+    return false;
+  }
+};
+
+// Сохранение аватара в IndexedDB
+const saveAvatarToDB = async (avatarData) => {
+  if (!props.userId) {
+    console.error("Нет userId для сохранения аватара");
+    return false;
+  }
+
+  try {
+    // Сначала убеждаемся, что запись существует
+    await ensureUserExists();
+
+    // Обновляем аватар
+    await usersDB.update(props.userId, {
+      avatar: avatarData,
+      updatedAt: new Date().toISOString(),
+    });
+    console.log("✅ Аватар успешно сохранен в IndexedDB");
+    return true;
+  } catch (error) {
+    console.error("❌ Ошибка сохранения аватара в IndexedDB:", error);
+    return false;
+  }
+};
+
+// Сохранение оригинала в IndexedDB
+const saveOriginalToDB = async (imageData) => {
+  if (!props.userId) return false;
+
+  try {
+    await ensureUserExists();
+
+    await usersDB.update(props.userId, {
+      originalAvatar: imageData,
+      updatedAt: new Date().toISOString(),
+    });
+    console.log("✅ Оригинал аватара сохранен в IndexedDB");
+    return true;
+  } catch (error) {
+    console.error("❌ Ошибка сохранения оригинала в IndexedDB:", error);
+    return false;
+  }
+};
+
 // Загрузка оригинала из IndexedDB
 const loadOriginalFromDB = async () => {
   if (!props.userId) return;
@@ -172,43 +238,20 @@ const loadOriginalFromDB = async () => {
   isLoading.value = true;
   try {
     const userData = await usersDB.get(props.userId);
+    console.log("Загружены данные из IndexedDB:", userData);
+
     if (userData?.originalAvatar) {
       originalImageSrc.value = userData.originalAvatar;
       emit("update:originalAvatar", userData.originalAvatar);
       console.log("Оригинал аватара загружен из IndexedDB");
     }
+    if (userData?.avatar && !props.avatarPreview) {
+      emit("update:avatarPreview", userData.avatar);
+    }
   } catch (error) {
     console.error("Ошибка загрузки из IndexedDB:", error);
   } finally {
     isLoading.value = false;
-  }
-};
-
-// Сохранение оригинала в IndexedDB
-const saveOriginalToDB = async (imageData) => {
-  if (!props.userId) return;
-
-  try {
-    await usersDB.update(props.userId, {
-      originalAvatar: imageData,
-    });
-    console.log("Оригинал сохранен в IndexedDB");
-  } catch (error) {
-    console.error("Ошибка сохранения в IndexedDB:", error);
-  }
-};
-
-// Удаление оригинала из IndexedDB
-const removeOriginalFromDB = async () => {
-  if (!props.userId) return;
-
-  try {
-    await usersDB.update(props.userId, {
-      originalAvatar: null,
-    });
-    console.log("Оригинал аватара удален из IndexedDB");
-  } catch (error) {
-    console.error("Ошибка удаления аватара из IndexedDB:", error);
   }
 };
 
@@ -270,11 +313,19 @@ const openCropperModal = () => {
 
 // Применить обрезку
 const applyCrop = async () => {
+  console.log("🖌️ applyCrop вызван");
+
   const cropper = cropperRef.value;
-  if (!cropper) return;
+  if (!cropper) {
+    console.error("Кроппер не найден");
+    return;
+  }
 
   const { canvas } = cropper.getResult();
-  if (!canvas) return;
+  if (!canvas) {
+    console.error("Canvas не получен");
+    return;
+  }
 
   const finalCanvas = document.createElement("canvas");
   finalCanvas.width = TARGET_SIZE.width;
@@ -311,12 +362,28 @@ const applyCrop = async () => {
   ctx.restore();
 
   const croppedImage = finalCanvas.toDataURL("image/jpeg", 0.9);
+  console.log(
+    "📸 Обрезанное изображение получено, длина:",
+    croppedImage.length,
+  );
 
-  emit("update:originalAvatar", originalImageSrc.value);
-  emit("update:avatarPreview", croppedImage);
-  emit("update:avatarFile", croppedImage);
+  // Сохраняем обрезанный аватар в IndexedDB
+  const saved = await saveAvatarToDB(croppedImage);
 
-  closeCropperModal();
+  if (saved) {
+    console.log("💾 Аватар сохранен в IndexedDB");
+
+    // Отправляем события
+    emit("update:originalAvatar", originalImageSrc.value);
+    emit("update:avatarPreview", croppedImage);
+    emit("update:avatarFile", croppedImage);
+    console.log("📤 События отправлены родителю");
+
+    closeCropperModal();
+  } else {
+    console.error("❌ Не удалось сохранить аватар");
+    alert("Ошибка при сохранении аватара");
+  }
 };
 
 // Обработчики
@@ -334,6 +401,23 @@ const closeCropperModal = () => {
 };
 
 const handleRemove = async () => {
+  console.log("🗑️ Удаление аватара");
+
+  // Удаляем из IndexedDB
+  if (props.userId) {
+    try {
+      await ensureUserExists();
+      await usersDB.update(props.userId, {
+        avatar: null,
+        originalAvatar: null,
+        updatedAt: new Date().toISOString(),
+      });
+      console.log("✅ Аватар удален из IndexedDB");
+    } catch (error) {
+      console.error("❌ Ошибка удаления аватара:", error);
+    }
+  }
+
   emit("remove");
   emit("update:avatarPreview", null);
   emit("update:avatarFile", null);
@@ -341,22 +425,28 @@ const handleRemove = async () => {
 
   originalImageSrc.value = null;
   currentCoordinates.value = null;
-
-  // Удаляем из IndexedDB
-  await removeOriginalFromDB();
 };
 
 // При монтировании загружаем сохраненный оригинал
-onMounted(() => {
-  loadOriginalFromDB();
+onMounted(async () => {
+  console.log("AvatarUploader mounted, userId:", props.userId);
+  if (props.userId) {
+    await ensureUserExists();
+    await loadOriginalFromDB();
+  }
 });
 
-// Следим за изменением bookId
+// Следим за изменением userId
 watch(
   () => props.userId,
-  () => {
-    loadOriginalFromDB();
+  async (newId, oldId) => {
+    console.log("userId изменился:", oldId, "->", newId);
+    if (newId) {
+      await ensureUserExists();
+      await loadOriginalFromDB();
+    }
   },
+  { immediate: true },
 );
 
 // Вотчер для props.originalAvatar

@@ -33,13 +33,16 @@
               class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold overflow-hidden"
             >
               <img
-                v-if="user?.photoURL"
-                :src="user.photoURL"
+                v-if="userAvatar"
+                :src="userAvatar"
+                alt="avatar"
                 class="w-full h-full object-cover"
               />
-              <span v-else>{{
-                user?.displayName?.charAt(0) || user?.email?.charAt(0)
-              }}</span>
+              <span v-else>
+                {{
+                  user?.displayName?.charAt(0) || user?.email?.charAt(0) || "?"
+                }}
+              </span>
             </div>
 
             <div class="flex-1 min-w-0">
@@ -389,6 +392,7 @@ const loadUserFromDB = async () => {
     if (userData) {
       if (userData.avatar) {
         userAvatar.value = userData.avatar;
+        avatarPreview.value = userData.avatar;
       }
       if (userData.dailyGoal) {
         dailyGoal.value = userData.dailyGoal;
@@ -396,6 +400,9 @@ const loadUserFromDB = async () => {
       }
       if (userData.originalAvatar) {
         originalAvatar.value = userData.originalAvatar;
+      }
+      if (userData.displayName) {
+        editDisplayName.value = userData.displayName;
       }
     }
   } catch (error) {
@@ -456,6 +463,7 @@ const openSection = (section) => {
 
   if (section === "profile") {
     editDisplayName.value = user.value?.displayName || "";
+    // Загружаем текущий аватар
     avatarPreview.value = userAvatar.value || null;
     originalAvatar.value = null;
     avatarFile.value = null;
@@ -477,6 +485,7 @@ const removeAvatar = () => {
   avatarPreview.value = null;
   avatarFile.value = null;
   originalAvatar.value = null;
+  userAvatar.value = null;
 };
 
 const saveSection = async () => {
@@ -489,27 +498,34 @@ const saveSection = async () => {
       case "profile": {
         const updates = {};
 
+        // Обновляем имя в Firebase Auth если изменилось
         if (editDisplayName.value !== user.value?.displayName) {
           updates.displayName = editDisplayName.value;
+          await updateProfile(user.value, {
+            displayName: editDisplayName.value,
+          });
         }
 
-        // Сохраняем только имя в Firebase Auth
-        if (Object.keys(updates).length > 0) {
-          await updateProfile(user.value, updates);
-        }
-
-        // Сохраняем аватар и имя в IndexedDB (как обложки)
+        // Сохраняем данные в IndexedDB
         const dbUpdates = {
           displayName: editDisplayName.value,
-          avatar: avatarPreview.value,
-          originalAvatar: originalAvatar.value,
         };
 
-        await saveUserToDB(dbUpdates);
-
-        if (avatarPreview.value !== userAvatar.value) {
+        // Если аватар был изменен через AvatarUploader, сохраняем его
+        if (
+          avatarPreview.value !== null &&
+          avatarPreview.value !== userAvatar.value
+        ) {
+          dbUpdates.avatar = avatarPreview.value;
           userAvatar.value = avatarPreview.value;
         }
+
+        // Сохраняем оригинал если есть
+        if (originalAvatar.value) {
+          dbUpdates.originalAvatar = originalAvatar.value;
+        }
+
+        await saveUserToDB(dbUpdates);
 
         sectionSuccess.value = "Профиль обновлён";
         break;
