@@ -1,16 +1,9 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import {
-  doc,
-  onSnapshot,
-  updateDoc,
-  setDoc,
-  getDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { updateProfile as firebaseUpdateProfile } from "firebase/auth";
-import { db, auth } from "../firebase/config";
+import { userAPI } from "../api";
 import { usersDB } from "../db/index";
+import { auth } from "../firebase/config";
+import { updateProfile as firebaseUpdateProfile } from "firebase/auth";
 
 export const useUserStore = defineStore("user", () => {
   const dailyGoal = ref(parseInt(localStorage.getItem("dailyGoal")) || 50);
@@ -20,43 +13,8 @@ export const useUserStore = defineStore("user", () => {
 
   let unsubscribeUser = null;
 
-  // ========== Работа с IndexedDB ==========
-  const saveUserToIndexedDB = async (userId, data) => {
-    if (!userId) return;
-
-    try {
-      const existing = await usersDB.get(userId);
-      const now = new Date().toISOString();
-
-      const userToSave = {
-        // Индексируемые поля
-        userId: userId,
-        email: data.email,
-        dailyGoal: data.dailyGoal,
-        createdAt: data.createdAt,
-        updatedAt: now,
-
-        // Неиндексируемые поля
-        avatar: data.avatar,
-        originalAvatar: data.originalAvatar,
-        displayName: data.displayName,
-      };
-
-      if (existing) {
-        await usersDB.update(userId, userToSave);
-      } else {
-        await usersDB.add({
-          ...userToSave,
-          createdAt: now,
-        });
-      }
-      console.log("Пользователь сохранен в IndexedDB");
-    } catch (error) {
-      console.error("Ошибка сохранения пользователя в IndexedDB:", error);
-    }
-  };
-
-  const loadUserFromIndexedDB = async (userId) => {
+  // ========== Загрузка из IndexedDB ==========
+  const loadFromIndexedDB = async (userId) => {
     if (!userId) return null;
 
     try {
@@ -72,7 +30,7 @@ export const useUserStore = defineStore("user", () => {
   };
 
   // ========== Синхронизация ==========
-  const initUserSync = (userId) => {
+  const initUserSync = async (userId) => {
     if (!userId) return;
 
     // Очищаем предыдущую подписку
@@ -84,53 +42,27 @@ export const useUserStore = defineStore("user", () => {
     syncStatus.value = "synced";
 
     try {
-      const userRef = doc(db, "users", userId);
+      // Сначала загружаем из кэша
+      const cached = await loadFromIndexedDB(userId);
+      if (cached) {
+        userData.value = cached;
+        if (cached.dailyGoal) {
+          dailyGoal.value = cached.dailyGoal;
+          localStorage.setItem("dailyGoal", cached.dailyGoal);
+        }
+      }
 
-      unsubscribeUser = onSnapshot(
-        userRef,
-        async (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.data();
+      // Подписываемся на реальные данные
+      unsubscribeUser = userAPI.subscribe(
+        userId,
+        async (fetchedUser) => {
+          userData.value = fetchedUser;
 
-            const userDataObj = {
-              userId: snapshot.id,
-              ...data,
-              createdAt: data.createdAt?.toDate?.() || data.createdAt,
-              updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-            };
-
-            userData.value = userDataObj;
-
-            await saveUserToIndexedDB(snapshot.id, {
-              ...data,
-              userId: snapshot.id,
-            });
-
-            if (data.dailyGoal) {
-              dailyGoal.value = data.dailyGoal;
-              localStorage.setItem("dailyGoal", data.dailyGoal);
-            }
-          } else {
-            console.log("Создаем документ пользователя в Firestore");
-            const newUserData = {
-              email: auth.currentUser?.email || "",
-              displayName: auth.currentUser?.displayName || "",
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
-              dailyGoal: dailyGoal.value,
-              avatar: null,
-              originalAvatar: null,
-            };
-
-            await setDoc(userRef, newUserData);
-
-            await saveUserToIndexedDB(userId, {
-              ...newUserData,
-              userId: userId,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            });
+          if (fetchedUser.dailyGoal) {
+            dailyGoal.value = fetchedUser.dailyGoal;
+            localStorage.setItem("dailyGoal", fetchedUser.dailyGoal);
           }
+
           loading.value = false;
         },
         (err) => {
@@ -153,57 +85,6 @@ export const useUserStore = defineStore("user", () => {
     userData.value = null;
   };
 
-  // ========== Работа с Firestore ==========
-  const saveUserToFirestore = async (updates) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("Not authenticated");
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-
-      const docSnap = await getDoc(userRef);
-
-      if (docSnap.exists()) {
-        await updateDoc(userRef, {
-          ...updates,
-          updatedAt: serverTimestamp(),
-        });
-      } else {
-        await setDoc(userRef, {
-          email: user.email,
-          displayName: user.displayName || "",
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          dailyGoal: dailyGoal.value,
-          avatar: null,
-          originalAvatar: null,
-          ...updates,
-        });
-      }
-
-      console.log("Данные пользователя сохранены в Firestore");
-
-      if (userData.value) {
-        userData.value = {
-          ...userData.value,
-          ...updates,
-          updatedAt: new Date(),
-        };
-      }
-
-      await saveUserToIndexedDB(user.uid, {
-        ...(userData.value || {}),
-        ...updates,
-        userId: user.uid,
-      });
-
-      return true;
-    } catch (err) {
-      console.error("Save user error:", err);
-      throw err;
-    }
-  };
-
   // ========== Обновление профиля ==========
   const updateAvatar = async (avatarBase64, originalAvatarBase64 = null) => {
     const user = auth.currentUser;
@@ -212,14 +93,13 @@ export const useUserStore = defineStore("user", () => {
     try {
       const updates = {
         avatar: avatarBase64,
-        updatedAt: serverTimestamp(),
       };
 
       if (originalAvatarBase64 !== undefined) {
         updates.originalAvatar = originalAvatarBase64;
       }
 
-      await saveUserToFirestore(updates);
+      await userAPI.updateProfile(updates);
 
       // Также сохраняем в локальном userData
       if (userData.value) {
@@ -229,6 +109,9 @@ export const useUserStore = defineStore("user", () => {
         }
         userData.value.updatedAt = new Date();
       }
+
+      // Обновляем в IndexedDB
+      await usersDB.update(user.uid, updates);
 
       return true;
     } catch (err) {
@@ -246,10 +129,7 @@ export const useUserStore = defineStore("user", () => {
         await firebaseUpdateProfile(user, { displayName: updates.displayName });
       }
 
-      await saveUserToFirestore({
-        ...updates,
-        updatedAt: serverTimestamp(),
-      });
+      await userAPI.updateProfile(updates);
 
       // Обновляем локальные данные
       if (userData.value) {
@@ -259,6 +139,9 @@ export const useUserStore = defineStore("user", () => {
           updatedAt: new Date(),
         };
       }
+
+      // Обновляем в IndexedDB
+      await usersDB.update(user.uid, updates);
 
       return true;
     } catch (err) {
@@ -274,7 +157,7 @@ export const useUserStore = defineStore("user", () => {
 
     const user = auth.currentUser;
     if (user) {
-      await saveUserToFirestore({ dailyGoal: goal });
+      await userAPI.updateProfile({ dailyGoal: goal });
     }
   };
 
@@ -284,11 +167,10 @@ export const useUserStore = defineStore("user", () => {
     loading,
     syncStatus,
     initUserSync,
-    saveUserToFirestore,
     updateAvatar,
     updateProfile,
     setDailyGoal,
-    loadUserFromIndexedDB,
+    loadFromIndexedDB,
     cleanup,
   };
 });
