@@ -121,6 +121,38 @@
         </div>
       </div>
 
+      <!-- Настройки режима отображения -->
+      <div class="p-4 border-b border-border dark:border-border-dark">
+        <p class="mb-3">Отображение книг:</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            @click.stop="setDisplayMode('grid')"
+            class="flex gap-3 justify-center items-center p-2 rounded-lg transition-colors"
+            :class="
+              displayMode === 'grid'
+                ? 'bg-accent/10 ring-2 ring-accent/50'
+                : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
+            "
+          >
+            <span class="text-2xl">⊞</span>
+            <span class="text-sm dark:text-gray-300">Сетка</span>
+          </button>
+
+          <button
+            @click.stop="setDisplayMode('list')"
+            class="flex gap-3 justify-center items-center p-2 rounded-lg transition-colors"
+            :class="
+              displayMode === 'list'
+                ? 'bg-accent/10 ring-2 ring-accent/50'
+                : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
+            "
+          >
+            <span class="text-2xl">☰</span>
+            <span class="text-sm dark:text-gray-300">Список</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Меню действий -->
       <div class="p-2 border-b border-border dark:border-border-dark">
         <button
@@ -133,14 +165,14 @@
 
       <div class="p-2">
         <button
-          @click.stop="handleLogout"
+          @click.stop="openLogoutConfirm"
           class="w-full px-4 py-1 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
         >
           <span class="flex-1 text-base">Выйти</span>
         </button>
 
         <button
-          @click.stop="confirmDelete"
+          @click.stop="openDeleteAccountConfirm"
           class="w-full px-4 py-1 text-left hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
         >
           <span class="flex-1 text-base">Удалить аккаунт</span>
@@ -300,6 +332,28 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Модальные окна подтверждения -->
+    <DeleteModal
+      :is-open="isLogoutConfirmOpen"
+      title="Выйти из аккаунта?"
+      message="Вы будете перенаправлены на страницу авторизации"
+      confirm-text="Выйти"
+      cancel-text="Отмена"
+      :danger="false"
+      @close="closeLogoutConfirm"
+      @confirm="handleLogout"
+    />
+    <DeleteModal
+      :is-open="isDeleteAccountConfirmOpen"
+      title="Удалить аккаунт?"
+      message="Это действие нельзя отменить. Все ваши данные будут безвозвратно удалены."
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      :danger="true"
+      @close="closeDeleteAccountConfirm"
+      @confirm="deleteAccount"
+    />
   </div>
 </template>
 
@@ -307,6 +361,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useColorMode } from "@vueuse/core";
+import { useDisplaySettingsStore } from "../stores/displaySettings";
 import { auth } from "../firebase/config";
 import {
   updateProfile,
@@ -319,9 +374,11 @@ import {
 import { useUserStore } from "../stores/user";
 import { usersDB } from "../db/index";
 import AvatarUploader from "./AvatarUploader.vue";
+import DeleteModal from "./DeleteModal.vue";
 
 const router = useRouter();
 const userStore = useUserStore();
+const displaySettings = useDisplaySettingsStore();
 const user = computed(() => auth.currentUser);
 
 // Тема
@@ -334,6 +391,9 @@ const colorMode = useColorMode({
   },
 });
 
+// Режим отображения
+const displayMode = computed(() => displaySettings.displayMode);
+
 // Состояние меню
 const isOpen = ref(false);
 const activeSection = ref(null);
@@ -345,6 +405,9 @@ const avatarPreview = ref(null);
 const avatarFile = ref(null);
 const originalAvatar = ref(null);
 const editDailyGoal = ref(50);
+
+const isLogoutConfirmOpen = ref(false);
+const isDeleteAccountConfirmOpen = ref(false);
 
 const passwordData = ref({
   current: "",
@@ -377,6 +440,29 @@ const modalTitle = computed(() => {
       return "";
   }
 });
+
+// Методы для режима отображения
+const setDisplayMode = (mode) => {
+  displaySettings.setDisplayMode(mode);
+};
+
+// Методы для модального окна подтверждения выхода
+const openLogoutConfirm = () => {
+  isLogoutConfirmOpen.value = true;
+};
+
+const closeLogoutConfirm = () => {
+  isLogoutConfirmOpen.value = false;
+};
+
+// Методы для модального окна подтверждения удаления аккаунта
+const openDeleteAccountConfirm = () => {
+  isDeleteAccountConfirmOpen.value = true;
+};
+
+const closeDeleteAccountConfirm = () => {
+  isDeleteAccountConfirmOpen.value = false;
+};
 
 // Обработчики AvatarUploader
 const handleAvatarPreviewUpdate = (newPreview) => {
@@ -479,7 +565,6 @@ const handleClickOutside = (event) => {
 // Методы для темы
 const setTheme = (theme) => {
   colorMode.value = theme;
-  isOpen.value = false;
 };
 
 // Методы меню
@@ -489,7 +574,6 @@ const toggleMenu = () => {
 
 const openSection = (section) => {
   activeSection.value = section;
-  isOpen.value = false;
   hasAvatarChanged.value = false;
 
   if (section === "profile") {
@@ -597,6 +681,8 @@ const handleLogout = async () => {
     router.push("/auth");
   } catch (error) {
     console.error("Logout error:", error);
+  } finally {
+    closeLogoutConfirm();
   }
 };
 
@@ -621,6 +707,8 @@ const deleteAccount = async () => {
   } catch (error) {
     console.error("Delete account error:", error);
     alert("Ошибка при удалении аккаунта");
+  } finally {
+    closeDeleteAccountConfirm();
   }
 };
 
