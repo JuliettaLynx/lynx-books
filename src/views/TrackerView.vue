@@ -49,20 +49,12 @@
       </div>
     </div>
 
-    <!-- Индикатор загрузки или ошибка -->
-    <!-- 
-    <div v-if="sessionStore.loading" class="p-4 text-center">
-      <div class="inline-block text-2xl animate-spin">⌛</div>
-      <p class="text-gray-500 dark:text-gray-400 mt-2">Загрузка сессий...</p>
-    </div>
-    -->
-
     <div v-if="sessionStore.error" class="p-4 text-center">
       <p class="text-red-500 dark:text-red-400">
         Ошибка: {{ sessionStore.error }}
       </p>
       <button
-        @click="retrySync"
+        @click="loadSessions"
         class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
       >
         Повторить
@@ -70,7 +62,7 @@
     </div>
 
     <!-- Календарь -->
-    <div v-else class="p-4">
+    <div class="p-4">
       <CalendarGrid
         :year="currentYear"
         :month="currentMonth"
@@ -112,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { auth } from "../firebase/config";
 import { useSessionStore } from "../stores/session";
 import IconButton from "../components/IconButton.vue";
@@ -146,31 +138,14 @@ const touchState = ref({
 });
 
 // ========== Вычисляемые свойства ==========
-const currentMonthName = computed(() => {
-  return new Date(currentYear.value, currentMonth.value, 1).toLocaleString(
-    "ru",
-    {
-      month: "long",
-    },
-  );
-});
-
-const daysInMonth = computed(() => {
-  return new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-});
-
-const monthlyPagesRead = computed(() => {
-  let total = 0;
-  for (let day = 1; day <= daysInMonth.value; day++) {
-    const date = new Date(currentYear.value, currentMonth.value, day);
-    total += sessionStore.getPagesReadByDate(date);
-  }
-  return total;
-});
+const currentMonthName = computed(() =>
+  new Date(currentYear.value, currentMonth.value, 1).toLocaleString("ru", {
+    month: "long",
+  }),
+);
 
 // ========== Навигация по месяцам ==========
 const prevMonth = () => {
-  console.log("prevMonth");
   if (currentMonth.value === 0) {
     currentMonth.value = 11;
     currentYear.value--;
@@ -180,7 +155,6 @@ const prevMonth = () => {
 };
 
 const nextMonth = () => {
-  console.log("nextMonth");
   if (currentMonth.value === 11) {
     currentMonth.value = 0;
     currentYear.value++;
@@ -194,13 +168,11 @@ const changeYear = (year) => {
   closeYearPicker();
 };
 
-// ========== Обработчики свайпа ==========
+// ========== Свайпы ==========
 const onTouchStart = (event) => {
   if (isSessionModalOpen.value) return;
-
   const touch = event.touches[0];
   if (!touch) return;
-
   touchState.value = {
     startX: touch.clientX,
     startY: touch.clientY,
@@ -209,58 +181,39 @@ const onTouchStart = (event) => {
     hasMoved: false,
     isHorizontalSwipe: false,
   };
-
-  console.log("Touch start:", touchState.value.startX, touchState.value.startY);
 };
 
 const onTouchMove = (event) => {
   if (isSessionModalOpen.value) return;
-  console.log("onTouchMove");
-
   const touch = event.touches[0];
   if (!touch) return;
-
   const deltaX = Math.abs(touch.clientX - touchState.value.startX);
   const deltaY = Math.abs(touch.clientY - touchState.value.startY);
-
   if (
     !touchState.value.hasMoved &&
     (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD)
   ) {
     touchState.value.hasMoved = true;
-    console.log("Movement detected");
   }
-
   if (touchState.value.hasMoved && deltaX > deltaY && deltaX > MOVE_THRESHOLD) {
     touchState.value.isHorizontalSwipe = true;
     event.preventDefault();
   }
-
   touchState.value.currentX = touch.clientX;
   touchState.value.currentY = touch.clientY;
 };
 
 const onTouchEnd = () => {
   if (isSessionModalOpen.value) return;
-
   if (!touchState.value.hasMoved) {
-    console.log("No movement, exiting");
     resetTouchState();
     return;
   }
-
   if (touchState.value.isHorizontalSwipe) {
     const deltaX = touchState.value.currentX - touchState.value.startX;
-    console.log("Horizontal swipe detected, deltaX:", deltaX);
-
     if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      if (deltaX > 0) {
-        console.log("Swipe right - previous month");
-        prevMonth();
-      } else {
-        console.log("Swipe left - next month");
-        nextMonth();
-      }
+      if (deltaX > 0) prevMonth();
+      else nextMonth();
     }
   }
   resetTouchState();
@@ -277,68 +230,37 @@ const resetTouchState = () => {
   };
 };
 
-// ========== Управление модалками ==========
-const openSessionModal = (date = new Date(), session = null) => {
+// ========== Модалки ==========
+const openSessionModal = (date = new Date()) => {
   selectedDate.value = date;
-  sessionToEdit.value = session;
+  sessionToEdit.value = null;
   isSessionModalOpen.value = true;
 };
+const closeSessionModal = () => (isSessionModalOpen.value = false);
 
 const openDayDetails = (date) => {
   selectedDate.value = date;
   isDayDetailsOpen.value = true;
 };
-
-const openYearPicker = () => {
-  isYearPickerOpen.value = true;
+const closeDayDetails = () => (isDayDetailsOpen.value = false);
+const handleCalendarClick = (date) => {
+  if (touchState.value.hasMoved) return;
+  openDayDetails(date);
 };
 
-const closeSessionModal = () => {
-  isSessionModalOpen.value = false;
-};
+const openYearPicker = () => (isYearPickerOpen.value = true);
+const closeYearPicker = () => (isYearPickerOpen.value = false);
 
-const closeDayDetails = () => {
-  isDayDetailsOpen.value = false;
-};
+const onSessionSaved = () => closeSessionModal();
+const onSessionUpdated = () => {};
 
-const closeYearPicker = () => {
-  isYearPickerOpen.value = false;
-};
-
-const handleCalendarClick = (event) => {
-  if (touchState.value.hasMoved) {
-    console.log("Ignoring click after swipe");
-    return;
-  }
-  openDayDetails(event);
-};
-
-const onSessionSaved = () => {
-  console.log("Session saved");
-};
-
-const onSessionUpdated = () => {
-  console.log("Session updated");
-};
-
-const retrySync = () => {
+const loadSessions = () => {
   if (auth.currentUser) {
     sessionStore.initSync(auth.currentUser.uid);
   }
 };
 
-// ========== Lifecycle ==========
 onMounted(() => {
-  console.log("TrackerView mounted");
-  if (auth.currentUser) {
-    console.log("Initializing session sync for user:", auth.currentUser.uid);
-    sessionStore.initSync(auth.currentUser.uid);
-  } else {
-    console.log("No user logged in");
-  }
-});
-
-onUnmounted(() => {
-  sessionStore.cleanup();
+  loadSessions();
 });
 </script>

@@ -1,18 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { db, auth } from "../firebase/config";
+import { sessionsAPI } from "../api";
 import { sessionsDB } from "../db/index";
+import { auth } from "../firebase/config";
 import { useLibraryStore } from "./library";
 
 export const useSessionStore = defineStore("session", () => {
@@ -24,39 +14,15 @@ export const useSessionStore = defineStore("session", () => {
 
   let unsubscribeSessions = null;
 
-  // ========== Работа с IndexedDB ==========
-  const saveSessionToIndexedDB = async (sessionData) => {
+  // ========== Загрузка из IndexedDB ==========
+  const loadFromIndexedDB = async (userId) => {
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const pagesRead =
-        sessionData.pagesRead ||
-        (sessionData.endPage && sessionData.startPage
-          ? sessionData.endPage - sessionData.startPage + 1
-          : 0);
-
-      await sessionsDB.put({
-        // Индексируемые поля
-        id: sessionData.id,
-        bookId: sessionData.bookId,
-        date: sessionData.date,
-        finishedBook: sessionData.finishedBook || false,
-        pagesRead: pagesRead,
-        color: sessionData.color || "#9CA3AF",
-        createdAt: sessionData.createdAt,
-
-        // Неиндексируемые поля
-        userId: user.uid,
-        bookTitle: sessionData.bookTitle || "",
-        startDate: sessionData.startDate || null,
-        startPage: sessionData.startPage || null,
-        endPage: sessionData.endPage || null,
-        rating: sessionData.rating || 0,
-        updatedAt: new Date(),
-      });
+      if (!userId) return [];
+      const cachedSessions = await sessionsDB.where("userId").equals(userId).toArray();
+      return cachedSessions;
     } catch (err) {
-      console.error("Ошибка сохранения сессии в IndexedDB:", err);
+      console.error("Load from IndexedDB error:", err);
+      return [];
     }
   };
 
@@ -85,7 +51,7 @@ export const useSessionStore = defineStore("session", () => {
   };
 
   // ========== Синхронизация ==========
-  const initSync = (userId) => {
+  const initSync = async (userId) => {
     if (!userId) return;
 
     if (unsubscribeSessions) {
@@ -96,27 +62,17 @@ export const useSessionStore = defineStore("session", () => {
     syncStatus.value = "synced";
 
     try {
-      const sessionsRef = collection(db, `users/${userId}/sessions`);
-      const q = query(sessionsRef, orderBy("date", "desc"));
+      // Сначала загружаем из кэша
+      const cached = await loadFromIndexedDB(userId);
+      if (cached.length > 0) {
+        sessions.value = cached;
+      }
 
-      unsubscribeSessions = onSnapshot(
-        q,
-        async (snapshot) => {
-          const newSessions = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            startDate: doc.data().startDate?.toDate?.() || doc.data().startDate,
-            date: doc.data().date?.toDate?.() || doc.data().date,
-            createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
-            updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
-          }));
-
-          sessions.value = newSessions;
-
-          for (const session of newSessions) {
-            await saveSessionToIndexedDB(session);
-          }
-
+      // Подписываемся на реальные данные
+      unsubscribeSessions = sessionsAPI.subscribe(
+        userId,
+        (fetchedSessions) => {
+          sessions.value = fetchedSessions;
           loading.value = false;
           error.value = null;
         },
@@ -189,40 +145,9 @@ export const useSessionStore = defineStore("session", () => {
 
   // ========== CRUD операции ==========
   const addSession = async (sessionData) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("Not authenticated");
-
-    const libraryStore = useLibraryStore();
-
-    const pagesRead =
-      sessionData.pagesRead ||
-      (sessionData.endPage && sessionData.startPage
-        ? sessionData.endPage - sessionData.startPage + 1
-        : 0);
-
-    const tempId = `temp_${Date.now()}`;
-    const optimisticSession = {
-      id: tempId,
-      ...sessionData,
-      pagesRead: pagesRead,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      _syncStatus: "pending",
-    };
-
-    sessions.value = [optimisticSession, ...sessions.value];
-    syncStatus.value = "pending";
-
     try {
-      const sessionsRef = collection(db, `users/${user.uid}/sessions`);
-
-      const docRef = await addDoc(sessionsRef, {
-        ...sessionData,
-        pagesRead: pagesRead,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        userId: user.uid,
-      });
+      const libraryStore = useLibraryStore();
+      const newSession = await sessionsAPI.create(sessionData);
 
       saveLastSession({
         bookId: sessionData.bookId,
@@ -237,79 +162,42 @@ export const useSessionStore = defineStore("session", () => {
         });
       }
 
-      sessions.value = sessions.value.filter((s) => s.id !== tempId);
-      return docRef.id;
+      return newSession.id;
     } catch (err) {
       console.error("Add session error:", err);
-      sessions.value = sessions.value.map((s) =>
-        s.id === tempId ? { ...s, _syncStatus: "error" } : s,
-      );
       error.value = err.message;
       throw err;
     }
   };
 
   const updateSession = async (id, sessionData) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("Not authenticated");
-
     const libraryStore = useLibraryStore();
-    const index = sessions.value.findIndex((s) => s.id === id);
-    if (index === -1) return;
-
-    const originalSession = { ...sessions.value[index] };
-
-    const pagesRead =
-      sessionData.pagesRead ||
-      (sessionData.endPage && sessionData.startPage
-        ? sessionData.endPage - sessionData.startPage + 1
-        : originalSession.pagesRead);
-
-    sessions.value[index] = {
-      ...sessions.value[index],
-      ...sessionData,
-      pagesRead: pagesRead,
-      updatedAt: new Date(),
-      _syncStatus: "pending",
-    };
+    const originalSession = sessions.value.find((s) => s.id === id);
 
     try {
-      const sessionRef = doc(db, `users/${user.uid}/sessions/${id}`);
-      await updateDoc(sessionRef, {
-        ...sessionData,
-        pagesRead: pagesRead,
-        updatedAt: serverTimestamp(),
-      });
+      await sessionsAPI.update(id, sessionData);
 
-      if (sessionData.finishedBook && !originalSession.finishedBook) {
+      if (sessionData.finishedBook && !originalSession?.finishedBook) {
         await libraryStore.updateBook(sessionData.bookId, {
           status: "прочитано",
           rating: sessionData.rating || 0,
         });
       }
+      
+      return true;
     } catch (err) {
       console.error("Update session error:", err);
-      sessions.value[index] = originalSession;
       error.value = err.message;
       throw err;
     }
   };
 
   const deleteSession = async (id) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("Not authenticated");
-
-    const deletedSession = sessions.value.find((s) => s.id === id);
-    sessions.value = sessions.value.filter((s) => s.id !== id);
-
     try {
-      const sessionRef = doc(db, `users/${user.uid}/sessions/${id}`);
-      await deleteDoc(sessionRef);
+      await sessionsAPI.delete(id);
+      return true;
     } catch (err) {
       console.error("Delete session error:", err);
-      if (deletedSession) {
-        sessions.value = [deletedSession, ...sessions.value];
-      }
       error.value = err.message;
       throw err;
     }
