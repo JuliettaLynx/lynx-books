@@ -7,9 +7,9 @@
       <div class="relative w-full overflow-auto">
         <!-- Шапка с заголовком и кнопкой закрытия -->
         <div
-          class="sticky top-0 z-20 bg-white dark:bg-bg-primary-dark pb-3 mb-4"
+          class="sticky px-3 top-0 z-20 bg-white dark:bg-bg-primary-dark pb-3 mb-4"
         >
-          <div class="flex justify-between items-center">
+          <div class="flex pt-3 justify-between items-center">
             <h2 class="text-xl font-bold dark:text-white">
               {{ isLibrary ? "Библиотека" : "Вишлист" }}
               {{ userName || userId }}
@@ -127,6 +127,7 @@
 
         <div
           v-else
+          class="px-4"
           :class="{
             'grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5':
               displayMode === 'grid',

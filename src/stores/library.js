@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { booksAPI } from "../api";
 import { booksDB } from "../db/index";
+import { auth } from "../firebase/config";
 
 export const useLibraryStore = defineStore("library", () => {
   const books = ref([]);

@@ -81,7 +81,7 @@
         </button>
       </div>
 
-      <div v-else class="p-4">
+      <div v-else>
         <div v-if="filteredBooks.length === 0" class="text-center py-8">
           <p class="text-gray-500 dark:text-gray-400">Книги не найдены</p>
         </div>

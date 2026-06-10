@@ -25,8 +25,9 @@
     />
 
     <div v-if="communityStore.loading" class="text-center py-8">
-      Загрузка...
+      <LoadingSpinner />
     </div>
+
     <div v-else-if="communityStore.error" class="text-center py-8 text-red-500">
       Ошибка: {{ communityStore.error }}
     </div>
@@ -74,6 +75,7 @@ import { auth } from "../firebase/config";
 import { useCommunityStore } from "../stores/community";
 import IconButton from "../components/IconButton.vue";
 import SearchInput from "../components/library/SearchInput.vue";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 import UserProfile from "../components/UserProfile.vue";
 import PrivacyModal from "../components/community/PrivacyModal.vue";
 import ShareModal from "../components/community/ShareModal.vue";

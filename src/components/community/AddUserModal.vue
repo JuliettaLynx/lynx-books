@@ -21,6 +21,7 @@
           />
           <div v-if="searching" class="absolute right-2 top-2">⏳</div>
         </div>
+
         <!-- Результаты поиска -->
         <div
           v-if="searchResults.length > 0"
@@ -44,12 +45,16 @@
             </div>
             <button
               @click="subscribeToUser(user.id)"
-              class="px-3 py-1 rounded text-sm bg-accent hover:bg-accent/80 text-white dark:text-border-dark transition-colors"
+              :disabled="loadingUsers.includes(user.id)"
+              class="px-3 py-1 rounded text-sm bg-accent hover:bg-accent/80 text-white dark:text-border-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Подписаться
+              {{
+                loadingUsers.includes(user.id) ? "Загрузка..." : "Подписаться"
+              }}
             </button>
           </div>
         </div>
+
         <div
           v-if="
             searchText &&
@@ -138,6 +143,7 @@ const validatingLink = ref(false);
 const linkInfo = ref(null);
 const subscribeLibrary = ref(false);
 const subscribeWishlist = ref(false);
+const loadingUsers = ref([]);
 
 const defaultAvatar = DEFAULT_AVATAR;
 
@@ -235,12 +241,20 @@ function onSearchInput(e) {
 // Подписка на обычного пользователя (найденного через поиск)
 async function subscribeToUser(userId) {
   addError.value = "";
+
+  // Добавляем userId в список загружаемых
+  if (!loadingUsers.value.includes(userId)) {
+    loadingUsers.value.push(userId);
+  }
+
   try {
     await communityStore.subscribe(userId);
     emit("added");
-    close();
   } catch (err) {
     addError.value = err.message || "Ошибка подписки";
+  } finally {
+    // Удаляем userId из списка загружаемых
+    loadingUsers.value = loadingUsers.value.filter((id) => id !== userId);
   }
 }
 

@@ -117,8 +117,7 @@ export const useCommunityStore = defineStore("community", () => {
         .filter(
           (u) =>
             u.id !== currentUserId &&
-            (u.displayName?.toLowerCase().includes(queryLower) ||
-              u.email?.toLowerCase().includes(queryLower)),
+            u.displayName?.toLowerCase().includes(queryLower),
         );
     } catch (err) {
       console.error("Search users error:", err);
