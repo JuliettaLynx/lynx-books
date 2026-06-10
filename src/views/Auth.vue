@@ -96,7 +96,6 @@
               {{ isLoginMode ? "Войти" : "Зарегистрироваться" }}
             </span>
             <span v-else class="flex items-center justify-center">
-              <span class="animate-spin mr-2">⌛</span>
               Загрузка...
             </span>
           </button>
@@ -151,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
   signInWithEmailAndPassword,
@@ -162,6 +161,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase/config";
 import ThemeToggle from "../components/ThemeToggle.vue";
+import { useUserStore } from "../stores/user";
 
 const router = useRouter();
 

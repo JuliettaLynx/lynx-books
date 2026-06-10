@@ -1,10 +1,23 @@
 <template>
   <div
-    class="fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50"
+    class="flex flex-col items-center justify-center pt-5"
+    :class="{ 'fixed inset-0 bg-gray-50 dark:bg-gray-900 z-50': fullscreen }"
   >
     <div class="text-center">
-      <div class="inline-block text-4xl animate-spin mb-4">⌛</div>
-      <p class="text-gray-600 dark:text-gray-400">Загрузка...</p>
+      <img
+        src="../../public/loading.png"
+        alt="Loading..."
+        class="w-10 h-10 mb-4 animate-spin"
+      />
     </div>
   </div>
 </template>
+
+<script setup>
+defineProps({
+  fullscreen: {
+    type: Boolean,
+    default: false,
+  },
+});
+</script>
