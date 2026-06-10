@@ -13,28 +13,80 @@
           </h1>
           <div class="flex gap-1 text-black dark:text-white">
             <!-- Кнопка сортировки -->
-            <IconButton
-              :icon="sortIcon"
-              :variant="'primary'"
-              @click="cycleSortMode"
-              class="text-xl"
-            />
+            <div class="relative" ref="sortMenuRef">
+              <IconButton
+                icon="🔽"
+                :variant="'primary'"
+                @click="toggleSortMenu"
+                class="text-xl"
+              />
+              <div
+                v-if="sortMenuOpen"
+                class="absolute right-0 mt-2 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+              >
+                <div class="p-2">
+                  <div
+                    v-for="category in sortCategories"
+                    :key="category.key"
+                    class="mb-2"
+                  >
+                    <div
+                      class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
+                    >
+                      {{ category.label }}
+                    </div>
+                    <button
+                      v-for="option in category.options"
+                      :key="option.value"
+                      @click="setSort(option.value)"
+                      class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                      :class="{
+                        'bg-purple-200 dark:bg-accent/30':
+                          currentSort === option.value,
+                      }"
+                    >
+                      {{ option.label }}
+                    </button>
+                  </div>
+                  <hr class="my-1 border-border dark:border-border-dark" />
+                  <button
+                    @click="setSort(null)"
+                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                  >
+                    Без сортировки
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <!-- Кнопка фильтра -->
-            <IconButton
-              :icon="filterIcon"
-              :variant="'primary'"
-              @click="cycleFilterMode"
-              class="text-xl"
-            />
-
-            <!-- Кнопка переключения режима отображения -->
-            <IconButton
-              :icon="viewMode === 'grid' ? '⊞' : '☰'"
-              :variant="'primary'"
-              @click="toggleViewMode"
-              class="text-xl text-center w-10"
-            />
+            <div class="relative" ref="filterMenuRef">
+              <IconButton
+                :icon="filterIcon"
+                :variant="'primary'"
+                @click="toggleFilterMenu"
+                class="text-xl"
+              />
+              <div
+                v-if="filterMenuOpen"
+                class="absolute right-0 mt-2 w-48 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+              >
+                <div class="p-2">
+                  <button
+                    v-for="option in filterOptions"
+                    :key="option.value"
+                    @click="setFilter(option.value)"
+                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                    :class="{
+                      'bg-purple-200 dark:bg-accent/30':
+                        currentFilter === option.value,
+                    }"
+                  >
+                    {{ option.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <!-- Иконка профиля -->
             <UserProfile />
@@ -86,18 +138,29 @@
       <div
         v-else
         :class="{
-          'grid grid-cols-2 gap-3': viewMode === 'tile',
-          'flex flex-col gap-3': viewMode === 'grid',
+          'grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5':
+            displayMode === 'grid',
+          'flex flex-col gap-3': displayMode === 'list',
         }"
       >
         <BookCard
           v-for="book in filteredBooks"
           :key="book.id"
           :book="book"
-          :is-grid="viewMode === 'grid'"
+          :is-grid="displayMode === 'list'"
           @edit="openEditModal"
           @favorite="handleToggleFavorite"
-          @delete="handleDelete"
+          @delete="openDeleteModal"
+        />
+        <DeleteModal
+          :is-open="isDeleteModalOpen"
+          title="Удалить книгу?"
+          message="Это действие нельзя отменить"
+          confirm-text="Удалить"
+          cancel-text="Отмена"
+          :danger="true"
+          @close="closeDeleteModal"
+          @confirm="confirmDelete"
         />
       </div>
     </div>
@@ -121,26 +184,61 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { auth } from "../firebase/config";
-import { useDebounceFn } from "@vueuse/core";
+import { useDebounceFn, onClickOutside } from "@vueuse/core";
 import { useLibraryStore } from "../stores/library";
+import { useDisplaySettingsStore } from "../stores/displaySettings";
 import IconButton from "../components/IconButton.vue";
 import SearchInput from "../components/library/SearchInput.vue";
 import BookCard from "../components/library/BookCard.vue";
 import BookModal from "../components/library/BookModal.vue";
 import UserProfile from "../components/UserProfile.vue";
+import DeleteModal from "../components/DeleteModal.vue";
 
 const libraryStore = useLibraryStore();
+const displaySettings = useDisplaySettingsStore();
+const displayMode = computed(() => displaySettings.displayMode);
 
 // Состояние UI
-const viewMode = ref("grid"); // 'grid' или 'tile'
 const searchQuery = ref("");
 const debouncedSearch = ref("");
-const sortMode = ref(0); // 0: название А-Я, 1: название Я-А, 2: автор А-Я, 3: автор Я-А
-const filterMode = ref(0); // 0: все, 1: избранные, 2: прочитано, 3: не прочитано, 4: брошено
+const sortMenuOpen = ref(false);
+const filterMenuOpen = ref(false);
+const currentSort = ref(null);
+const currentFilter = ref("all");
 const isModalOpen = ref(false);
 const editingBook = ref(null);
+const isDeleteModalOpen = ref(false);
+const deletingBookId = ref(null);
+
+// Рефы для onClickOutside
+const sortMenuRef = ref(null);
+const filterMenuRef = ref(null);
+
+// Закрытие меню при клике вне
+onClickOutside(sortMenuRef, () => (sortMenuOpen.value = false));
+onClickOutside(filterMenuRef, () => (filterMenuOpen.value = false));
+
+// Категории сортировки
+const sortCategories = [
+  {
+    key: "title",
+    label: "Название",
+    options: [
+      { value: "title_asc", label: "По возрастанию (А–Я)" },
+      { value: "title_desc", label: "По убыванию (Я–А)" },
+    ],
+  },
+  {
+    key: "author",
+    label: "Автор",
+    options: [
+      { value: "author_asc", label: "По возрастанию (А–Я)" },
+      { value: "author_desc", label: "По убыванию (Я–А)" },
+    ],
+  },
+];
 
 onMounted(() => {
   // Если пользователь вошел, а данные ещё не синхронизированы
@@ -149,13 +247,25 @@ onMounted(() => {
   }
 });
 
-// Иконки для сортировки
-const sortIcons = ["🔤↑", "🔤↓", "👤↑", "👤↓"];
-const sortIcon = computed(() => sortIcons[sortMode.value]);
+// Опции фильтра
+const filterOptions = [
+  { value: "all", label: "📚 Все" },
+  { value: "favorite", label: "❤️ Избранные" },
+  { value: "finished", label: "✅ Прочитано" },
+  { value: "unfinished", label: "📖 Не прочитано" },
+  { value: "abandoned", label: "❌ Брошено" },
+];
 
-// Иконки для фильтра
-const filterIcons = ["📚", "❤️", "✅", "📖", "❌"];
-const filterIcon = computed(() => filterIcons[filterMode.value]);
+// Иконка для кнопки фильтра
+const filterIcon = computed(() => {
+  const map = {
+    favorite: "❤️",
+    finished: "✅",
+    unfinished: "📖",
+    abandoned: "❌",
+  };
+  return map[currentFilter.value] || "📚";
+});
 
 // Методы управления модалкой
 const openModal = () => {
@@ -171,6 +281,27 @@ const openEditModal = (book) => {
 const closeModal = () => {
   isModalOpen.value = false;
   editingBook.value = null;
+};
+
+// Методы управления сортировкой и фильтрами
+const toggleSortMenu = () => {
+  sortMenuOpen.value = !sortMenuOpen.value;
+  filterMenuOpen.value = false;
+};
+
+const toggleFilterMenu = () => {
+  filterMenuOpen.value = !filterMenuOpen.value;
+  sortMenuOpen.value = false;
+};
+
+const setSort = (value) => {
+  currentSort.value = value;
+  sortMenuOpen.value = false;
+};
+
+const setFilter = (value) => {
+  currentFilter.value = value;
+  filterMenuOpen.value = false;
 };
 
 // Переключение режима отображения
@@ -201,20 +332,20 @@ watch(searchQuery, (value) => {
 const filteredByStatus = computed(() => {
   let filtered = [...libraryStore.books];
 
-  switch (filterMode.value) {
-    case 1: // избранные
+  switch (currentFilter.value) {
+    case "favorite":
       filtered = filtered.filter((book) => book.isFavorite);
       break;
-    case 2: // прочитано
+    case "finished":
       filtered = filtered.filter((book) => book.status === "прочитано");
       break;
-    case 3: // не прочитано
+    case "unfinished":
       filtered = filtered.filter((book) => book.status === "не прочитано");
       break;
-    case 4: // брошено
+    case "abandoned":
       filtered = filtered.filter((book) => book.status === "брошено");
       break;
-    case 0: // все
+    case "all":
     default:
       break;
   }
@@ -238,24 +369,15 @@ const searched = computed(() => {
 const filteredBooks = computed(() => {
   const sorted = [...searched.value];
 
-  sorted.sort((a, b) => {
-    switch (sortMode.value) {
-      case 0: // название А-Я
-        return (a.title || "").localeCompare(b.title || "");
-      case 1: // название Я-А
-        return (b.title || "").localeCompare(a.title || "");
-      case 2: // автор А-Я
-        const authorA = a.author || "";
-        const authorB = b.author || "";
-        return authorA.localeCompare(authorB);
-      case 3: // автор Я-А
-        const authorA2 = a.author || "";
-        const authorB2 = b.author || "";
-        return authorB2.localeCompare(authorA2);
-      default:
-        return 0;
-    }
-  });
+  if (currentSort.value) {
+    const [field, order] = currentSort.value.split("_");
+    sorted.sort((a, b) => {
+      let valA = a[field] || "";
+      let valB = b[field] || "";
+      if (order === "asc") return valA > valB ? 1 : -1;
+      else return valA < valB ? 1 : -1;
+    });
+  }
 
   return sorted;
 });
@@ -265,10 +387,25 @@ const handleToggleFavorite = async (book) => {
   await libraryStore.toggleFavorite(book);
 };
 
-const handleDelete = async (book) => {
-  if (confirm(`Удалить книгу "${book.title}"?`)) {
-    await libraryStore.deleteBook(book.id);
+const openDeleteModal = (book) => {
+  deletingBookId.value = book.id;
+  isDeleteModalOpen.value = true;
+};
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false;
+  deletingBookId.value = null;
+};
+
+const confirmDelete = async () => {
+  if (deletingBookId.value) {
+    try {
+      await libraryStore.deleteBook(deletingBookId.value);
+    } catch (error) {
+      console.error("Delete book error:", error);
+    }
   }
+  closeDeleteModal();
 };
 
 // Сохранение книги

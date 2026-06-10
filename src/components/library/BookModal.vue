@@ -37,6 +37,7 @@
             v-if="form.status === 'прочитано'"
             v-model="form.rating"
           />
+          <BookReview v-model="form.review" />
           <BookDescription v-model="form.description" />
         </div>
 
@@ -59,6 +60,7 @@ import BookFormFields from "../modal/BookForm.vue";
 import BookFormat from "../modal/BookFormat.vue";
 import BookStatus from "../modal/BookStatus.vue";
 import BookRating from "../modal/BookRating.vue";
+import BookReview from "../modal/BookReview.vue";
 import BookDescription from "../modal/BookDescription.vue";
 import PublisherSelect from "../modal/PublisherSelect.vue";
 import AuthorSelect from "../modal/AuthorSelect.vue";
@@ -83,6 +85,7 @@ const form = reactive({
   publisher: "",
   status: "не прочитано",
   rating: 0,
+  review: "",
   description: "",
 });
 
@@ -93,6 +96,7 @@ const resetForm = () => {
   form.format = "бумажная";
   form.status = "не прочитано";
   form.rating = 0;
+  form.review = "";
   form.description = "";
   form.publisher = "";
   coverPreview.value = null;
@@ -109,6 +113,7 @@ watch(
       form.format = book.format || "бумажная";
       form.status = book.status || "не прочитано";
       form.rating = book.rating || 0;
+      form.review = book.review || "";
       form.description = book.description || "";
 
       if (book.author) {
@@ -174,6 +179,7 @@ const handleSubmit = () => {
     format: form.format,
     status: form.status,
     rating: form.status === "прочитано" ? form.rating : 0,
+    review: form.review.trim(),
     description: form.description.trim(),
     cover: coverPreview.value,
     originalCover: originalCover.value,
