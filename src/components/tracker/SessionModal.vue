@@ -338,7 +338,8 @@ const form = reactive({
 // ========== Вспомогательные функции ==========
 const formatDateForInput = (date) => {
   if (!date) return "";
-  const d = new Date(date);
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return "";
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
@@ -347,7 +348,8 @@ const formatDateForInput = (date) => {
 
 const formatTimeForInput = (date) => {
   if (!date) return "";
-  const d = new Date(date);
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return "";
   const hours = String(d.getHours()).padStart(2, "0");
   const minutes = String(d.getMinutes()).padStart(2, "0");
   return `${hours}:${minutes}`;
@@ -396,19 +398,33 @@ const selectedBookTitle = computed(() => {
 });
 
 const formattedStartDate = computed(() => {
-  return form.startDate ? formatDateForInput(form.startDate) : "";
+  if (!form.startDate) return "";
+  const d =
+    form.startDate instanceof Date ? form.startDate : new Date(form.startDate);
+  if (isNaN(d.getTime())) return "";
+  return formatDateForInput(d);
 });
 
 const formattedStartTime = computed(() => {
-  return form.startDate ? formatTimeForInput(form.startDate) : "";
+  if (!form.startDate) return "";
+  const d =
+    form.startDate instanceof Date ? form.startDate : new Date(form.startDate);
+  if (isNaN(d.getTime())) return "";
+  return formatTimeForInput(d);
 });
 
 const formattedEndDate = computed(() => {
-  return form.date ? formatDateForInput(form.date) : "";
+  if (!form.date) return "";
+  const d = form.date instanceof Date ? form.date : new Date(form.date);
+  if (isNaN(d.getTime())) return "";
+  return formatDateForInput(d);
 });
 
 const formattedEndTime = computed(() => {
-  return form.date ? formatTimeForInput(form.date) : "";
+  if (!form.date) return "";
+  const d = form.date instanceof Date ? form.date : new Date(form.date);
+  if (isNaN(d.getTime())) return "";
+  return formatTimeForInput(d);
 });
 
 const pagesRead = computed(() => {
@@ -430,32 +446,41 @@ const timeRead = computed(() => {
 
 // ========== Методы обновления даты и времени ==========
 const updateStartDate = (dateStr) => {
-  const newDate = combineDateTime(dateStr, formattedStartTime.value);
-  if (newDate) {
+  if (!dateStr) return;
+  const timeStr = formattedStartTime.value || "00:00";
+  const newDate = combineDateTime(dateStr, timeStr);
+  if (newDate && !isNaN(newDate.getTime())) {
     form.startDate = newDate;
     validateAndFixDates();
   }
 };
 
 const updateStartTime = (timeStr) => {
-  const newDate = combineDateTime(formattedStartDate.value, timeStr);
-  if (newDate) {
+  if (!timeStr) return;
+  const dateStr =
+    formattedStartDate.value || formatDateForInput(form.startDate);
+  const newDate = combineDateTime(dateStr, timeStr);
+  if (newDate && !isNaN(newDate.getTime())) {
     form.startDate = newDate;
     validateAndFixDates();
   }
 };
 
 const updateEndDate = (dateStr) => {
-  const newDate = combineDateTime(dateStr, formattedEndTime.value);
-  if (newDate) {
+  if (!dateStr) return;
+  const timeStr = formattedEndTime.value || "00:00";
+  const newDate = combineDateTime(dateStr, timeStr);
+  if (newDate && !isNaN(newDate.getTime())) {
     form.date = newDate;
     validateAndFixDates();
   }
 };
 
 const updateEndTime = (timeStr) => {
-  const newDate = combineDateTime(formattedEndDate.value, timeStr);
-  if (newDate) {
+  if (!timeStr) return;
+  const dateStr = formattedEndDate.value || formatDateForInput(form.date);
+  const newDate = combineDateTime(dateStr, timeStr);
+  if (newDate && !isNaN(newDate.getTime())) {
     form.date = newDate;
     validateAndFixDates();
   }
@@ -484,19 +509,25 @@ const loadLastSession = () => {
 // ========== Сброс формы ==========
 const resetForm = () => {
   if (props.sessionToEdit?.id) {
-    console.log("Editing session:", props.sessionToEdit);
-
     if (props.sessionToEdit) {
       form.bookId = props.sessionToEdit.bookId;
       form.color = props.sessionToEdit.color || "#3B82F6";
-      form.startDate = props.sessionToEdit.startDate
-        ? new Date(props.sessionToEdit.startDate)
-        : new Date(props.sessionToEdit.date);
-      form.date = new Date(props.sessionToEdit.date);
       form.startPage = props.sessionToEdit.startPage || null;
       form.endPage = props.sessionToEdit.endPage || null;
       form.finishedBook = props.sessionToEdit.finishedBook || false;
       form.rating = props.sessionToEdit.rating || 0;
+
+      form.date = props.sessionToEdit.date
+        ? props.sessionToEdit.date instanceof Date
+          ? props.sessionToEdit.date
+          : new Date(props.sessionToEdit.date)
+        : new Date();
+
+      form.startDate = props.sessionToEdit.startDate
+        ? props.sessionToEdit.startDate instanceof Date
+          ? props.sessionToEdit.startDate
+          : new Date(props.sessionToEdit.startDate)
+        : new Date(form.date);
     }
   } else {
     form.bookId = "";
@@ -510,10 +541,10 @@ const resetForm = () => {
 
     if (isFromCalendar.value) {
       const fixedDate = new Date(props.initialDate);
-      fixedDate.setHours(now.getHours(), now.getMinutes());
+      fixedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0);
       form.startDate = fixedDate;
       form.date = new Date(fixedDate);
-      form.date.setMinutes(form.date.getMinutes() + 30); // По умолчанию +30 минут
+      form.date.setMinutes(form.date.getMinutes() + 30);
     } else {
       form.startDate = new Date();
       form.date = new Date();

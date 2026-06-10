@@ -231,7 +231,9 @@ const sessionsAPI = {
 
     try {
       const sessionsRef = collection(db, `users/${userId}/sessions`);
-      const docRef = await addDoc(sessionsRef, {
+
+      // Преобразуем Date в Timestamp для Firestore
+      const dataToSave = {
         ...sessionData,
         pagesRead,
         finishedBook: sessionData.finishedBook || false,
@@ -240,7 +242,17 @@ const sessionsAPI = {
         userId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      // Преобразуем startDate и date в Timestamp если это Date объекты
+      if (dataToSave.startDate instanceof Date) {
+        dataToSave.startDate = dataToSave.startDate;
+      }
+      if (dataToSave.date instanceof Date) {
+        dataToSave.date = dataToSave.date;
+      }
+
+      const docRef = await addDoc(sessionsRef, dataToSave);
 
       return { id: docRef.id, ...sessionData, pagesRead };
     } catch (err) {
@@ -261,11 +273,13 @@ const sessionsAPI = {
           ? sessionData.endPage - sessionData.startPage + 1
           : undefined);
 
-      await updateDoc(sessionRef, {
+      const dataToUpdate = {
         ...sessionData,
         ...(pagesRead !== undefined && { pagesRead }),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      await updateDoc(sessionRef, dataToUpdate);
       return true;
     } catch (err) {
       console.error("Update session error:", err);
@@ -298,6 +312,7 @@ const sessionsAPI = {
           id: d.id,
           ...d.data(),
           date: d.data().date?.toDate?.() || d.data().date,
+          startDate: d.data().startDate?.toDate?.() || d.data().startDate,
           createdAt: d.data().createdAt?.toDate?.() || d.data().createdAt,
           updatedAt: d.data().updatedAt?.toDate?.() || d.data().updatedAt,
         }));
