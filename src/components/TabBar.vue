@@ -11,5 +11,8 @@
     <router-link to="/wishlist">
       <span class="text-xl">🎁</span>
     </router-link>
+    <router-link to="/community">
+      <span class="text-xl">👥</span>
+    </router-link>
   </nav>
 </template>
