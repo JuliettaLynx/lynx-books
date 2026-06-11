@@ -77,7 +77,7 @@
     <DeleteModal
       :is-open="showConfirm"
       title="Отписаться"
-      :message="`Вы уверены, что хотите отписаться от ${subscription.displayName}?`"
+      :message="unsubscribeMessage"
       confirm-text="Отписаться"
       danger
       @close="showConfirm = false"
@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import DeleteModal from "../DeleteModal.vue";
 import { DEFAULT_AVATAR, DEFAULT_COVER } from "../../constants/constants.js";
 
@@ -103,6 +103,34 @@ const showConfirm = ref(false);
 const defaultAvatar = DEFAULT_AVATAR;
 const defaultCover = DEFAULT_COVER;
 
+// Определяем тип подписки
+const subscriptionType = computed(() => {
+  const sub = props.subscription;
+  // Если есть доступ только к библиотеке - отписываемся от библиотеки
+  if (sub.hasLibraryAccess && !sub.hasWishlistAccess) {
+    return "library";
+  }
+  // Если есть доступ только к вишлисту - отписываемся от вишлиста
+  if (sub.hasWishlistAccess && !sub.hasLibraryAccess) {
+    return "wishlist";
+  }
+  // Если есть доступ к обоим или ни к одному - общая отписка (null)
+  return null;
+});
+
+const unsubscribeMessage = computed(() => {
+  const name = props.subscription.displayName;
+  const type = subscriptionType.value;
+
+  if (type === "library") {
+    return `Вы уверены, что хотите отписаться от библиотеки ${name}?`;
+  } else if (type === "wishlist") {
+    return `Вы уверены, что хотите отписаться от вишлиста ${name}?`;
+  } else {
+    return `Вы уверены, что хотите отписаться от ${name}?`;
+  }
+});
+
 // Открытие модального окна подтверждения перед отпиской
 const confirmUnsubscribe = () => {
   showConfirm.value = true;
@@ -110,6 +138,6 @@ const confirmUnsubscribe = () => {
 
 // Обработчик подтверждения отписки
 const handleUnsubscribe = () => {
-  emit("unsubscribe", props.subscription.userId);
+  emit("unsubscribe", props.subscription.userId, subscriptionType.value);
 };
 </script>

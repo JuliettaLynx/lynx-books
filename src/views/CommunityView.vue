@@ -148,8 +148,8 @@ const openUserList = (userId, listType) => {
   externalViewOpen.value = true;
 };
 
-const handleUnsubscribe = async (userId) => {
-  await unsubscribe(userId);
+const handleUnsubscribe = async (userId, listType = null) => {
+  await unsubscribe(userId, listType);
   await refreshSubscriptions();
 };
 

@@ -1,98 +1,99 @@
 <template>
   <div class="relative w-full">
-    <!-- Поле ввода -->
-    <div class="relative">
-      <input
-        ref="inputRef"
-        type="text"
-        v-model="searchQuery"
-        @focus="handleFocus"
-        @input="handleInput"
-        @keydown.down.prevent="selectNext"
-        @keydown.up.prevent="selectPrevious"
-        @keydown.enter.prevent="selectCurrent"
-        @keydown.esc="closeDropdown"
-        @blur="handleBlur"
-        :placeholder="placeholder"
-        class="w-full mt-1.5 px-3 py-2 border border-border dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-white dark:bg-border-dark/40 dark:text-white"
-      />
-    </div>
-
-    <!-- Выпадающий список -->
-    <div
-      v-if="
-        isOpen && (startsWithResults.length > 0 || containsResults.length > 0)
-      "
-      class="absolute text-sm z-10 w-full mt-1 bg-white dark:bg-bg-primary-dark dark:text-gray-100 border border-purple-400/50 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+    <Combobox
+      v-model="selectedPublisher"
+      :nullable="true"
+      @update:modelValue="handleSelect"
     >
-      <ul>
+      <div class="relative">
+        <ComboboxInput
+          class="w-full mt-1.5 px-3 py-2 border border-border dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-white dark:bg-border-dark/40 dark:text-white"
+          :placeholder="placeholder"
+          :displayValue="displayValue"
+          @change="searchQuery = $event.target.value"
+        />
+      </div>
+
+      <ComboboxOptions
+        class="absolute text-sm z-10 w-full mt-1 bg-white dark:bg-bg-primary-dark dark:text-gray-100 border border-purple-400/50 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+      >
         <!-- Группа "Начинается с" -->
-        <li
-          v-if="startsWithResults.length > 0"
-          class="px-4 py-1 text-xs font-semibold text-black dark:text-white bg-purple-100 dark:bg-border-dark sticky top-0"
-        >
-          Начинается с "{{ searchQuery }}"
-        </li>
-        <li
-          v-for="(publisher, index) in startsWithResults"
-          :key="publisher.id"
-          @mousedown.prevent="selectPublisher(publisher.name)"
-          @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'starts')"
-          :class="[
-            'px-4 py-2 cursor-pointer text-sm transition-colors',
-            highlightedIndex === getAbsoluteIndex(index, 'starts')
-              ? 'bg-accent text-white'
-              : 'hover:bg-purple-400/10 dark:hover:bg-border-dark/50',
-          ]"
-        >
-          {{ publisher.name }}
-        </li>
+        <template v-if="startsWithResults.length">
+          <div
+            class="px-4 py-1 text-xs font-semibold text-black dark:text-white bg-purple-100 dark:bg-border-dark sticky top-0"
+          >
+            Начинается с "{{ searchQuery }}"
+          </div>
+          <ComboboxOption
+            v-for="publisher in startsWithResults"
+            :key="publisher.id"
+            :value="publisher"
+            v-slot="{ active }"
+          >
+            <li
+              :class="[
+                'px-4 py-2 cursor-pointer text-sm transition-colors',
+                active
+                  ? 'bg-border-dark/50 text-white'
+                  : 'hover:bg-purple-400/10 dark:hover:bg-border-dark/50',
+              ]"
+            >
+              {{ publisher.displayName }}
+            </li>
+          </ComboboxOption>
+        </template>
 
         <!-- Группа "Содержит" -->
-        <li
-          v-if="containsResults.length > 0"
-          class="px-4 py-1 text-xs font-semibold text-black dark:text-white bg-purple-100 dark:bg-border-dark sticky top-0"
-        >
-          Содержит "{{ searchQuery }}"
-        </li>
-        <li
-          v-for="(publisher, index) in containsResults"
-          :key="`contains-${publisher.id}`"
-          @mousedown.prevent="selectPublisher(publisher.name)"
-          @mouseenter="highlightedIndex = getAbsoluteIndex(index, 'contains')"
-          :class="[
-            'px-4 py-2 text-sm cursor-pointer transition-colors',
-            highlightedIndex === getAbsoluteIndex(index, 'contains')
-              ? 'bg-accent text-white'
-              : 'hover:bg-purple-400/10 dark:hover:bg-border-dark/50',
-          ]"
-        >
-          {{ publisher.name }}
-        </li>
-      </ul>
-    </div>
+        <template v-if="containsResults.length">
+          <div
+            class="px-4 py-1 text-xs font-semibold text-black dark:text-white bg-purple-100 dark:bg-border-dark sticky top-0"
+          >
+            Содержит "{{ searchQuery }}"
+          </div>
+          <ComboboxOption
+            v-for="publisher in containsResults"
+            :key="publisher.id"
+            :value="publisher"
+            v-slot="{ active }"
+          >
+            <li
+              :class="[
+                'px-4 py-2 text-sm cursor-pointer transition-colors',
+                active
+                  ? 'bg-border-dark/50 text-white'
+                  : 'hover:bg-purple-400/10 dark:hover:bg-border-dark/50',
+              ]"
+            >
+              {{ publisher.displayName }}
+            </li>
+          </ComboboxOption>
+        </template>
 
-    <!-- Сообщение, если ничего не найдено, но есть введенный текст -->
-    <div
-      v-else-if="
-        isOpen &&
-        searchQuery &&
-        startsWithResults.length === 0 &&
-        containsResults.length === 0
-      "
-      class="absolute text-sm z-10 w-full mt-1 bg-white dark:bg-gray-900 dark:text-gray-100 border border-gray-300 rounded-lg shadow-lg p-4 text-gray-500 text-center"
-    >
-      Будет добавлено:
-      <span class="font-medium text-blue-500">"{{ searchQuery }}"</span>
-    </div>
+        <!-- Сообщение "Будет добавлено" -->
+        <div
+          v-if="
+            searchQuery && !startsWithResults.length && !containsResults.length
+          "
+          class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 text-center"
+        >
+          Будет добавлено:
+          <span class="font-medium text-blue-500">"{{ searchQuery }}"</span>
+        </div>
+      </ComboboxOptions>
+    </Combobox>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
+import { ref, computed, watch } from "vue";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxOptions,
+  ComboboxOption,
+} from "@headlessui/vue";
 import { publishersList } from "../../constants/publishers";
 
-// Props
 const props = defineProps({
   modelValue: {
     type: [String, null],
@@ -104,273 +105,101 @@ const props = defineProps({
   },
 });
 
-// Emits
 const emit = defineEmits(["update:modelValue"]);
 
-// Состояние
+// Состояния
 const searchQuery = ref("");
-const isOpen = ref(false);
-const highlightedIndex = ref(-1);
-const isSelecting = ref(false);
-const skipNextWatch = ref(false);
-const inputRef = ref(null);
+const selectedPublisher = ref(null);
 
 // Фильтрация издательств
 const filteredPublishers = computed(() => {
   if (!searchQuery.value) {
     return {
-      startsWith: [...publishersList],
+      startsWith: publishersList.map((publisher) => ({
+        ...publisher,
+        displayName: publisher.name,
+      })),
       contains: [],
     };
   }
 
   const query = searchQuery.value.toLowerCase().trim();
-
-  const startsWith = [];
-  const contains = [];
+  const startsWithResults = [];
+  const containsResults = [];
 
   publishersList.forEach((publisher) => {
     const nameLower = publisher.name.toLowerCase();
-
     if (nameLower.startsWith(query)) {
-      startsWith.push(publisher);
+      startsWithResults.push({
+        ...publisher,
+        displayName: publisher.name,
+      });
     } else if (nameLower.includes(query)) {
-      contains.push(publisher);
+      containsResults.push({
+        ...publisher,
+        displayName: publisher.name,
+      });
     }
   });
 
-  // Сортируем каждую группу по алфавиту
+  // Сортировка по алфавиту
   const sortByName = (a, b) => a.name.localeCompare(b.name);
-
   return {
-    startsWith: startsWith.sort(sortByName),
-    contains: contains.sort(sortByName),
+    startsWith: startsWithResults.sort(sortByName),
+    contains: containsResults.sort(sortByName),
   };
 });
 
-// Вычисляемые свойства для каждой группы
 const startsWithResults = computed(() => filteredPublishers.value.startsWith);
 const containsResults = computed(() => filteredPublishers.value.contains);
 
-// Получение абсолютного индекса для выделения
-const getAbsoluteIndex = (index, group) => {
-  if (group === "starts") {
-    return index;
-  } else {
-    return startsWithResults.value.length + index;
+// Отображаемое значение в поле ввода
+const displayValue = (publisher) => {
+  if (publisher && typeof publisher === "object") {
+    return publisher.displayName;
   }
+  return searchQuery.value;
 };
 
-// Получение элемента по абсолютному индексу
-const getItemByAbsoluteIndex = (index) => {
-  const startsCount = startsWithResults.value.length;
-
-  if (index < startsCount) {
-    return startsWithResults.value[index];
-  } else {
-    return containsResults.value[index - startsCount];
-  }
-};
-
-// Общее количество отфильтрованных элементов
-const totalFilteredCount = computed(
-  () => startsWithResults.value.length + containsResults.value.length,
-);
-
-// Методы
-const selectPublisher = (publisherName) => {
-  isSelecting.value = true;
-  searchQuery.value = publisherName;
-  isOpen.value = false;
-  emit("update:modelValue", publisherName);
-
-  // Скрываем клавиатуру на мобильных устройствах
-  if (inputRef.value && inputRef.value.blur) {
-    inputRef.value.blur();
-  }
-
-  setTimeout(() => {
-    isSelecting.value = false;
-  }, 100);
-};
-
-// Обработка ввода
-const handleInput = () => {
-  // Принудительно открываем список на следующем тике
-  nextTick(() => {
-    if (searchQuery.value !== undefined) {
-      isOpen.value = true;
-      highlightedIndex.value = -1;
-
-      // Принудительно обновляем список через пересчет computed свойств
-      const _ = startsWithResults.value;
-      const __ = containsResults.value;
-    }
-
-    if (!searchQuery.value.trim()) {
-      emit("update:modelValue", null);
-    }
-  });
-};
-
-// Следим за изменением searchQuery для принудительного обновления списка
-watch(searchQuery, (newValue, oldValue) => {
-  // Пропускаем если это инициализация или если флаг активен
-  if (skipNextWatch.value) {
-    skipNextWatch.value = false;
-    return;
-  }
-
-  // Пропускаем если это начальное заполнение из props (oldValue === undefined)
-  if (oldValue === undefined) {
-    return;
-  }
-
-  if (!isSelecting.value && newValue !== oldValue) {
-    nextTick(() => {
-      // Принудительно открываем список, даже если текст изменился
-      if (searchQuery.value !== undefined) {
-        isOpen.value = true;
-        highlightedIndex.value = -1;
-
-        // Триггерим обновление списка
-        const _ = startsWithResults.value;
-        const __ = containsResults.value;
-      }
-    });
-  }
-});
-
-const closeDropdown = () => {
-  isOpen.value = false;
-};
-
-const handleFocus = () => {
-  // На мобильных устройствах открываем список с небольшой задержкой
-  setTimeout(() => {
-    if (!isSelecting.value) {
-      isOpen.value = true;
-      // Принудительно обновляем список при фокусе
-      const _ = startsWithResults.value;
-      const __ = containsResults.value;
-    }
-  }, 50);
-};
-
-const handleBlur = () => {
-  // Увеличен таймаут для мобильных устройств
-  setTimeout(() => {
-    if (isSelecting.value) {
-      return;
-    }
-
-    if (searchQuery.value.trim()) {
-      emit("update:modelValue", searchQuery.value.trim());
-    } else {
-      emit("update:modelValue", null);
-    }
-    isOpen.value = false;
-  }, 200);
-};
-
-// Навигация с клавиатуры
-const selectNext = () => {
-  if (!isOpen.value) {
-    isOpen.value = true;
-    return;
-  }
-
-  if (totalFilteredCount.value > 0) {
-    highlightedIndex.value =
-      (highlightedIndex.value + 1) % totalFilteredCount.value;
-    scrollToHighlighted();
-  }
-};
-
-const selectPrevious = () => {
-  if (!isOpen.value) {
-    isOpen.value = true;
-    return;
-  }
-
-  if (totalFilteredCount.value > 0) {
-    highlightedIndex.value =
-      highlightedIndex.value <= 0
-        ? totalFilteredCount.value - 1
-        : highlightedIndex.value - 1;
-    scrollToHighlighted();
-  }
-};
-
-const selectCurrent = () => {
-  if (highlightedIndex.value >= 0 && totalFilteredCount.value > 0) {
-    const selectedItem = getItemByAbsoluteIndex(highlightedIndex.value);
-    selectPublisher(selectedItem.name);
-  } else if (totalFilteredCount.value === 1) {
-    const selectedItem = getItemByAbsoluteIndex(0);
-    selectPublisher(selectedItem.name);
+// Обработчик выбора элемента из списка
+const handleSelect = (publisher) => {
+  if (publisher && typeof publisher === "object") {
+    // Выбрано существующее издательство
+    const publisherName = publisher.name;
+    emit("update:modelValue", publisherName);
+    searchQuery.value = publisherName;
   } else if (searchQuery.value.trim()) {
-    const value = searchQuery.value.trim();
-    emit("update:modelValue", value);
-    isOpen.value = false;
+    // Пользователь ввёл новое значение (нет в списке)
+    const newValue = searchQuery.value.trim();
+    emit("update:modelValue", newValue);
+  } else {
+    emit("update:modelValue", null);
   }
 };
 
-// Скролл к выделенному элементу
-const scrollToHighlighted = () => {
-  nextTick(() => {
-    const highlightedElement = document.querySelector(".bg-blue-500");
-    if (highlightedElement) {
-      highlightedElement.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
-      });
-    }
-  });
-};
-
-// Закрытие списка при клике вне компонента
-const handleClickOutside = (event) => {
-  if (!event.target.closest(".relative")) {
-    isOpen.value = false;
-  }
-};
-
-// Следим за изменением modelValue извне (при редактировании)
+// Синхронизация с внешним modelValue (при редактировании книги)
 watch(
   () => props.modelValue,
   (newValue) => {
-    skipNextWatch.value = true;
-    searchQuery.value = newValue || "";
+    if (newValue && typeof newValue === "string") {
+      searchQuery.value = newValue;
+      // Находим объект издательства для правильного отображения выбранного элемента
+      const found = publishersList.find((p) => p.name === newValue);
+      if (found) {
+        selectedPublisher.value = {
+          ...found,
+          displayName: found.name,
+        };
+      } else {
+        selectedPublisher.value = null;
+      }
+    } else {
+      searchQuery.value = "";
+      selectedPublisher.value = null;
+    }
   },
   { immediate: true },
 );
-
-// Сбрасываем подсветку при изменении списка
-watch([startsWithResults, containsResults], () => {
-  highlightedIndex.value = -1;
-});
-
-onMounted(() => {
-  document.addEventListener("mousedown", handleClickOutside);
-
-  // Для мобильных устройств - принудительное обновление при изменении значения
-  if (inputRef.value) {
-    inputRef.value.addEventListener("input", () => {
-      nextTick(() => {
-        isOpen.value = true;
-      });
-    });
-  }
-});
-
-onUnmounted(() => {
-  document.removeEventListener("mousedown", handleClickOutside);
-
-  if (inputRef.value) {
-    inputRef.value.removeEventListener("input", () => {});
-  }
-});
 </script>
 
 <style scoped>
