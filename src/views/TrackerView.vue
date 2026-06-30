@@ -47,6 +47,14 @@
           class="text-xl dark:text-white"
         />
       </div>
+
+      <!-- Кнопка добавления сессии -->
+      <IconButton
+        icon="+"
+        variant="primary"
+        class="fixed z-20 right-4 bottom-20 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center transition-colors duration-200"
+        @click="openSessionModal"
+      />
     </div>
 
     <div v-if="sessionStore.error" class="p-4 text-center">
@@ -69,14 +77,6 @@
         @day-click="handleCalendarClick"
       />
     </div>
-
-    <!-- Кнопка добавления сессии -->
-    <IconButton
-      icon="+"
-      variant="primary"
-      class="fixed z-20 right-4 bottom-20 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center transition-colors duration-200"
-      @click="openSessionModal"
-    />
 
     <!-- Модальные окна -->
     <SessionModal

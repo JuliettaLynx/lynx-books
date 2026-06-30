@@ -15,14 +15,14 @@
       <div class="p-3 pt-0">
         <SearchInput v-model="searchQuery" placeholder="Поиск подписок..." />
       </div>
-    </div>
 
-    <IconButton
-      icon="+"
-      variant="primary"
-      @click="addModalOpen = true"
-      class="fixed z-20 right-4 bottom-20 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center"
-    />
+      <IconButton
+        icon="+"
+        variant="primary"
+        @click="addModalOpen = true"
+        class="fixed z-20 right-4 bottom-20 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center"
+      />
+    </div>
 
     <div v-if="communityStore.loading" class="text-center py-8">
       <LoadingSpinner />

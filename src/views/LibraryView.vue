@@ -100,6 +100,14 @@
           class="mt-3"
         />
       </div>
+
+      <!-- Кнопка добавления -->
+      <IconButton
+        icon="+"
+        variant="primary"
+        class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+        @click="openModal"
+      />
     </div>
 
     <div v-if="libraryStore.error" class="p-4 text-center">
@@ -147,14 +155,6 @@
           @delete="openDeleteModal"
         />
       </div>
-
-      <!-- Кнопка добавления -->
-      <IconButton
-        icon="+"
-        variant="primary"
-        class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
-        @click="openModal"
-      />
 
       <!-- Модальное окно -->
       <BookModal

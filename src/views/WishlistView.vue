@@ -66,6 +66,13 @@
           class="mt-3"
         />
       </div>
+
+      <IconButton
+        icon="+"
+        variant="primary"
+        class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+        @click="openAddModal"
+      />
     </div>
 
     <div class="p-4">
@@ -106,13 +113,6 @@
         </div>
       </div>
     </div>
-
-    <IconButton
-      icon="+"
-      variant="primary"
-      class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
-      @click="openAddModal"
-    />
 
     <WishlistModal
       :is-open="isModalOpen"
