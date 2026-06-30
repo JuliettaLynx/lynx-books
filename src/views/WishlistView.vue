@@ -69,8 +69,6 @@
     </div>
 
     <div class="p-4">
-      <LoadingSpinner v-if="wishlistStore.loading" />
-
       <div v-if="error" class="p-4 text-center">
         <p class="text-red-500">Ошибка: {{ error }}</p>
         <button
@@ -81,7 +79,7 @@
         </button>
       </div>
 
-      <div v-else>
+      <div v-if="!wishlistStore.loading">
         <div v-if="filteredBooks.length === 0" class="text-center py-8">
           <p class="text-gray-500 dark:text-gray-400">Книги не найдены</p>
         </div>

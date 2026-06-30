@@ -102,20 +102,12 @@
       </div>
     </div>
 
-    <!-- Индикатор загрузки или ошибка -->
-    <!--
-    <div v-if="libraryStore.loading" class="p-4 text-center">
-      <div class="inline-block text-2xl animate-spin">⌛</div>
-      <p class="text-gray-500 dark:text-gray-400 mt-2">Загрузка...</p>
-    </div>
-    -->
-
     <div v-if="libraryStore.error" class="p-4 text-center">
       <p class="text-red-500 dark:text-red-400">
         Ошибка: {{ libraryStore.error }}
       </p>
       <button
-        @click="libraryStore.loadBooks"
+        @click="libraryStore.initSync(auth.currentUser?.uid)"
         class="mt-2 rounded-lg bg-accent px-4 py-2 text-white"
       >
         Повторить
@@ -123,7 +115,7 @@
     </div>
 
     <!-- Список книг -->
-    <div v-else class="p-4">
+    <div v-if="!libraryStore.loading" class="p-4">
       <div v-if="filteredBooks.length === 0" class="text-center py-8">
         <p class="text-gray-500 dark:text-gray-400">Книги не найдены</p>
         <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">
@@ -194,6 +186,7 @@ import { useDebounceFn, onClickOutside } from "@vueuse/core";
 import { useLibraryStore } from "../stores/library";
 import { useDisplaySettingsStore } from "../stores/displaySettings";
 import IconButton from "../components/IconButton.vue";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 import SearchInput from "../components/library/SearchInput.vue";
 import BookCard from "../components/library/BookCard.vue";
 import BookModal from "../components/library/BookModal.vue";

@@ -17,8 +17,11 @@ export const useWishlistStore = defineStore("wishlist", () => {
     try {
       const user = auth.currentUser;
       if (!user) return [];
-      
-      const cachedBooks = await wishlistDB.where("userId").equals(user.uid).toArray();
+
+      const cachedBooks = await wishlistDB
+        .where("userId")
+        .equals(user.uid)
+        .toArray();
       return cachedBooks;
     } catch (err) {
       console.error("Load from IndexedDB error:", err);
@@ -70,7 +73,7 @@ export const useWishlistStore = defineStore("wishlist", () => {
   const addBook = async (bookData) => {
     try {
       const newBook = await wishlistAPI.create(bookData);
-      
+
       // Сохраняем в IndexedDB
       await wishlistDB.put({
         id: newBook.id,
@@ -98,13 +101,13 @@ export const useWishlistStore = defineStore("wishlist", () => {
   const updateBook = async (id, bookData) => {
     try {
       await wishlistAPI.update(id, bookData);
-      
+
       // Обновляем в IndexedDB
       await wishlistDB.update(id, {
         ...bookData,
         updatedAt: new Date().toISOString(),
       });
-      
+
       return true;
     } catch (err) {
       console.error("Update wishlist error:", err);

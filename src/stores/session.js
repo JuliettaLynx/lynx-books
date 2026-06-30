@@ -18,7 +18,10 @@ export const useSessionStore = defineStore("session", () => {
   const loadFromIndexedDB = async (userId) => {
     try {
       if (!userId) return [];
-      const cachedSessions = await sessionsDB.where("userId").equals(userId).toArray();
+      const cachedSessions = await sessionsDB
+        .where("userId")
+        .equals(userId)
+        .toArray();
       return cachedSessions;
     } catch (err) {
       console.error("Load from IndexedDB error:", err);
@@ -183,7 +186,7 @@ export const useSessionStore = defineStore("session", () => {
           rating: sessionData.rating || 0,
         });
       }
-      
+
       return true;
     } catch (err) {
       console.error("Update session error:", err);

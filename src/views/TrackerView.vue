@@ -62,7 +62,7 @@
     </div>
 
     <!-- Календарь -->
-    <div class="p-4">
+    <div v-if="!sessionStore.loading" class="p-4">
       <CalendarGrid
         :year="currentYear"
         :month="currentMonth"
@@ -109,6 +109,7 @@ import { auth } from "../firebase/config";
 import { useSessionStore } from "../stores/session";
 import IconButton from "../components/IconButton.vue";
 import UserProfile from "../components/UserProfile.vue";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 import CalendarGrid from "../components/tracker/CalendarGrid.vue";
 import SessionModal from "../components/tracker/SessionModal.vue";
 import DayDetailsModal from "../components/tracker/DayDetailsModal.vue";
