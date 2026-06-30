@@ -5,24 +5,46 @@
     >
       Статус чтения
     </label>
-    <div class="flex gap-2 flex-wrap">
+    <div class="space-y-1.5">
+      <!-- Первая кнопка на всю ширину -->
       <label
-        v-for="status in statuses"
-        :key="status.value"
-        class="flex-1 px-1.5 py-2 rounded-lg border cursor-pointer transition-colors"
-        :class="getStatusClass(status.value)"
+        class="block px-0.5 py-2 rounded-lg border cursor-pointer transition-colors"
+        :class="getStatusClass(statuses[0].value)"
       >
         <input
           type="radio"
-          :value="status.value"
-          :checked="modelValue === status.value"
+          :value="statuses[0].value"
+          :checked="modelValue === statuses[0].value"
           class="hidden"
-          @change="$emit('update:modelValue', status.value)"
+          @change="$emit('update:modelValue', statuses[0].value)"
         />
         <div class="text-center">
-          <span class="text-xs dark:text-gray-300">{{ status.label }}</span>
+          <span class="text-sm dark:text-gray-300">{{
+            statuses[0].label
+          }}</span>
         </div>
       </label>
+
+      <!-- Остальные в ряд -->
+      <div class="flex gap-1.5">
+        <label
+          v-for="status in statuses.slice(1)"
+          :key="status.value"
+          class="flex-1 px-0.5 py-2 rounded-lg border cursor-pointer transition-colors"
+          :class="getStatusClass(status.value)"
+        >
+          <input
+            type="radio"
+            :value="status.value"
+            :checked="modelValue === status.value"
+            class="hidden"
+            @change="$emit('update:modelValue', status.value)"
+          />
+          <div class="text-center">
+            <span class="text-sm dark:text-gray-300">{{ status.label }}</span>
+          </div>
+        </label>
+      </div>
     </div>
   </div>
 </template>

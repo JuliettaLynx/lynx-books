@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div class="mt-4">
     <label
-      class="block text-sm mt-4 font-medium text-gray-700 dark:text-gray-300 mb-2"
+      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
     >
-      Формат книги
+      Формат
     </label>
-    <div class="flex gap-3">
+    <div class="flex gap-2" :class="{ 'flex-col gap-2': isNarrow }">
       <label class="flex items-center">
         <input
           type="radio"
@@ -16,7 +16,6 @@
         />
         <span class="text-sm dark:text-gray-300">Бумажная</span>
       </label>
-
       <label class="flex items-center">
         <input
           type="radio"
@@ -27,7 +26,6 @@
         />
         <span class="text-sm dark:text-gray-300">Электронная</span>
       </label>
-
       <label class="flex items-center">
         <input
           type="radio"
@@ -43,16 +41,29 @@
 </template>
 
 <script setup>
-defineProps({
-  modelValue: String,
+import { ref, onMounted, onUnmounted } from "vue";
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: "бумажная",
+  },
 });
 
-defineEmits(["update:modelValue"]);
-</script>
+const emit = defineEmits(["update:modelValue"]);
 
-<style scoped>
-.text-13 {
-  font-size: 0.8rem;
-  line-height: 1rem;
-}
-</style>
+const isNarrow = ref(false);
+
+const checkWidth = () => {
+  isNarrow.value = window.innerWidth < 330;
+};
+
+onMounted(() => {
+  checkWidth();
+  window.addEventListener("resize", checkWidth);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkWidth);
+});
+</script>
