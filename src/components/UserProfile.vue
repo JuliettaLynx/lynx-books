@@ -3,7 +3,7 @@
     <!-- Иконка профиля -->
     <button
       @click.stop="toggleMenu"
-      class="w-10 h-10 rounded-full bg-green-300 flex items-center justify-center text-black font-bold text-lg transition-all overflow-hidden"
+      class="w-10 h-10 z-50 rounded-full bg-green-300 flex items-center justify-center text-black font-bold text-lg transition-all overflow-hidden"
       :class="{ 'ring-2 ring-accent': isOpen }"
     >
       <img
@@ -20,7 +20,12 @@
     <!-- Выпадающее меню -->
     <div
       v-if="isOpen"
-      class="absolute z-50 right-0 top-12 w-80 bg-white dark:bg-bg-secondary-dark rounded-2xl shadow-xl border border-border dark:border-border-dark text-black dark:text-white overflow-hidden"
+      @click="isOpen = false"
+      class="fixed pb-14 inset-0 bg-black bg-opacity-60 z-30 overflow-auto"
+    ></div>
+    <div
+      v-if="isOpen"
+      class="absolute z-50 right-0 top-12 w-72 bg-white dark:bg-bg-secondary-dark rounded-2xl shadow-xl border border-border dark:border-border-dark text-black dark:text-white overflow-hidden"
     >
       <!-- Шапка профиля -->
       <div
@@ -49,12 +54,9 @@
           <div class="flex-1 min-w-0 relative text-left left-3">
             <p class="font-bold truncate">
               {{ user?.displayName || "Пользователь" }}
+              <span class="relative left-2 text-base">✎</span>
             </p>
             <p class="text-sm truncate">{{ user?.email }}</p>
-          </div>
-
-          <div class="w-12">
-            <span class="relative top-1 left-2 text-xl">✎</span>
           </div>
         </button>
       </div>
@@ -78,92 +80,95 @@
 
       <!-- Настройки темы -->
       <div class="p-4 border-b border-border dark:border-border-dark">
-        <p class="mb-3">Оформление:</p>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-6 gap-4">
+          <p class="col-span-3">Тема:</p>
           <button
             @click.stop="setTheme('light')"
-            class="flex flex-col items-center p-2 rounded-lg transition-colors"
+            class="flex flex-col items-center justify-center rounded-lg transition-colors"
             :class="
               colorMode === 'light'
                 ? 'bg-accent/10 ring-2 ring-accent/50'
                 : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
             "
           >
-            <span class="text-2xl mb-1">☀️</span>
-            <span class="text-xs dark:text-gray-300">Светлая</span>
+            <span class="text-base mb-1">☀️</span>
           </button>
 
           <button
             @click.stop="setTheme('dark')"
-            class="flex flex-col items-center p-2 rounded-lg transition-colors"
+            class="flex flex-col items-center justify-center rounded-lg transition-colors"
             :class="
               colorMode === 'dark'
                 ? 'bg-accent/10 ring-2 ring-accent/50'
                 : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
             "
           >
-            <span class="text-2xl mb-1">🌙</span>
-            <span class="text-xs dark:text-gray-300">Тёмная</span>
+            <span class="text-base mb-1">🌙</span>
           </button>
 
           <button
             @click.stop="setTheme('auto')"
-            class="flex flex-col items-center p-2 rounded-lg transition-colors"
+            class="flex flex-col items-center justify-center rounded-lg transition-colors"
             :class="
               colorMode === 'auto'
                 ? 'bg-accent/10 ring-2 ring-accent/50'
                 : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
             "
           >
-            <span class="text-2xl mb-1">⚙️</span>
-            <span class="text-xs dark:text-gray-300">Системная</span>
+            <span class="text-base mb-1">⚙️</span>
           </button>
         </div>
       </div>
 
       <!-- Настройки режима отображения -->
       <div class="p-4 border-b border-border dark:border-border-dark">
-        <p class="mb-3">Отображение книг:</p>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-6 gap-4">
+          <p class="col-span-4">Отображение книг:</p>
           <button
             @click.stop="setDisplayMode('grid')"
-            class="flex gap-3 justify-center items-center p-2 rounded-lg transition-colors"
+            class="flex gap-3 justify-center items-center rounded-lg transition-colors"
             :class="
               displayMode === 'grid'
                 ? 'bg-accent/10 ring-2 ring-accent/50'
                 : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
             "
           >
-            <span class="text-2xl">⊞</span>
-            <span class="text-sm dark:text-gray-300">Сетка</span>
+            <span class="text-lg">⊞</span>
           </button>
 
           <button
             @click.stop="setDisplayMode('list')"
-            class="flex gap-3 justify-center items-center p-2 rounded-lg transition-colors"
+            class="flex gap-3 justify-center items-center rounded-lg transition-colors"
             :class="
               displayMode === 'list'
                 ? 'bg-accent/10 ring-2 ring-accent/50'
                 : 'hover:bg-border/50 dark:hover:bg-border-dark/40'
             "
           >
-            <span class="text-2xl">☰</span>
-            <span class="text-sm dark:text-gray-300">Список</span>
+            <span class="text-lg">☰</span>
           </button>
         </div>
       </div>
 
-      <!-- Меню действий -->
+      <!-- Меню информации -->
       <div class="p-2 border-b border-border dark:border-border-dark">
+        <button
+          @click.stop="openAboutModal"
+          class="w-full px-4 py-2 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 transition-colors"
+        >
+          <span class="flex-1 text-base">О нас</span>
+        </button>
+      </div>
+
+      <!-- Меню действий -->
+      <div class="p-2">
         <button
           @click.stop="openSection('password')"
           class="w-full px-4 py-2 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 transition-colors"
         >
           <span class="flex-1 text-base">Сменить пароль</span>
         </button>
-      </div>
 
-      <div class="p-2">
         <button
           @click.stop="openLogoutConfirm"
           class="w-full px-4 py-1 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
@@ -189,6 +194,7 @@
       >
         <div
           class="bg-white dark:bg-bg-secondary-dark w-full max-w-md rounded-2xl max-h-[90vh] flex flex-col"
+          @click.stop
         >
           <!-- Заголовок модалки -->
           <div
@@ -333,6 +339,87 @@
       </div>
     </Teleport>
 
+    <!-- Модальное окно "О нас" -->
+    <Teleport to="body">
+      <div
+        v-if="showAboutModal"
+        class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4"
+        @click="showAboutModal = false"
+      >
+        <div
+          class="bg-white dark:bg-bg-secondary-dark w-full max-w-md rounded-2xl max-h-[90vh] flex flex-col shadow-2xl"
+          @click.stop
+        >
+          <!-- Заголовок -->
+          <div
+            class="p-4 border-b border-border dark:border-border-dark flex justify-between items-center"
+          >
+            <h2 class="text-xl font-bold dark:text-white">О нас</h2>
+            <button
+              @click="showAboutModal = false"
+              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <span class="text-2xl">✕</span>
+            </button>
+          </div>
+
+          <!-- Контент -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <!-- Описание -->
+            <div>
+              <h3 class="font-semibold text-lg mb-2 dark:text-white">
+                Наше приложение
+              </h3>
+              <p
+                class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed"
+              >
+                <b>Lynx Books</b> — это современный цифровой помощник для
+                читателей, в котором можно:<br />📚 Вести личную библиотеку и
+                список желаний <br />⏱️ Отслеживать прогресс чтения<br />👥
+                Выбирать книги для подарки
+              </p>
+            </div>
+
+            <!-- Контакты -->
+            <div>
+              <h3 class="font-semibold text-lg mb-3 dark:text-white">
+                Контакты
+              </h3>
+              <div class="flex space-x-2">
+                <span>💬</span>
+                <a
+                  href="https://t.me/JuliettaLynx"
+                  target="_blank"
+                  class="text-sm text-accent hover:underline"
+                >
+                  Telegram: @JuliettaLynx
+                </a>
+              </div>
+            </div>
+
+            <!-- Обратная связь -->
+            <div>
+              <h3 class="font-semibold text-lg mb-2 dark:text-white">
+                Обратная связь
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                Есть идея, предложение или нашли баг? Мы будем рады вашему
+                отзыву!
+              </p>
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSdSlanCQfeF_4zFU9pj1IdYPxGSJBN4pGtslnWWvsdZfO4lgQ/viewform?usp=header"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm font-medium"
+              >
+                <span>📝</span> Оставить отзыв
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Модальные окна подтверждения -->
     <DeleteModal
       :is-open="isLogoutConfirmOpen"
@@ -408,6 +495,7 @@ const editDailyGoal = ref(50);
 
 const isLogoutConfirmOpen = ref(false);
 const isDeleteAccountConfirmOpen = ref(false);
+const showAboutModal = ref(false);
 
 const passwordData = ref({
   current: "",
@@ -462,6 +550,11 @@ const openDeleteAccountConfirm = () => {
 
 const closeDeleteAccountConfirm = () => {
   isDeleteAccountConfirmOpen.value = false;
+};
+
+// Методы для модального окна "О нас"
+const openAboutModal = () => {
+  showAboutModal.value = true;
 };
 
 // Обработчики AvatarUploader
