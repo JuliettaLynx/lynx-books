@@ -2,11 +2,12 @@
   <div class="flex-shrink-0 border-t border-border dark:border-border-dark p-4">
     <div class="flex gap-2">
       <button
+        v-if="isEdit"
         type="button"
-        @click="$emit('reset')"
-        class="flex-1 py-2 px-4 dark:bg-border-dark/40 border border-border dark:border-border-dark rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark dark:text-white transition-colors"
+        @click="$emit('delete')"
+        class="py-2 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-300/30 dark:border-red-500/30 rounded-lg transition-colors"
       >
-        Очистить
+        🗑
       </button>
       <button
         type="button"
@@ -24,5 +25,5 @@ defineProps({
   isEdit: Boolean,
 });
 
-defineEmits(["reset", "submit"]);
+defineEmits(["submit", "delete"]);
 </script>

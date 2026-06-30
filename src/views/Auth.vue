@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-white transition-colors duration-200 dark:bg-bg-primary-dark flex items-center justify-center p-4"
+    class="fixed min-h-screen min-w-full bg-white transition-colors duration-200 dark:bg-bg-primary-dark flex items-center justify-center p-4"
   >
     <div class="w-full max-w-md">
       <!-- Шапка с заголовком и темой -->

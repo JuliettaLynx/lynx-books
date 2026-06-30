@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="isOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-[70] p-4"
       @click.self="close"
     >
       <div
