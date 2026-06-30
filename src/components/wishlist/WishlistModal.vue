@@ -58,8 +58,8 @@
 
         <ModalActions
           :is-edit="!!bookToEdit?.id"
-          @reset="resetForm"
           @submit="handleSubmit"
+          @delete="handleDelete"
         />
       </div>
     </div>
@@ -83,7 +83,7 @@ const props = defineProps({
   bookToEdit: Object,
 });
 
-const emit = defineEmits(["close", "save"]);
+const emit = defineEmits(["close", "save", "delete"]);
 
 // Состояния для обложки
 const coverPreview = ref(null);
@@ -170,6 +170,10 @@ const handleSubmit = () => {
   if (props.bookToEdit?.id) bookData.id = props.bookToEdit.id;
   emit("save", bookData);
   handleClose();
+};
+
+const handleDelete = () => {
+  emit("delete", props.bookToEdit);
 };
 
 const getPriorityButtonClass = (p) => {

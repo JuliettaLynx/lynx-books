@@ -1,33 +1,9 @@
 <template>
   <div
-    class="border border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark cursor-pointer rounded-lg dark:text-white relative"
+    class="border border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark cursor-pointer rounded-lg dark:text-white relative min-h-36"
     :class="[isGrid ? 'flex' : '']"
+    @click="handleCardClick"
   >
-    <!-- Три точки для плитки -->
-    <div v-if="!isGrid" class="absolute top-1 right-2 z-10">
-      <button @click.stop="toggleMenu" class="text-2xl font-black leading-5">
-        ⋯
-      </button>
-      <div
-        v-if="menuOpen"
-        ref="menuRef"
-        class="absolute right-0 top-full mt-1 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-20 min-w-[120px]"
-      >
-        <button
-          @click="handleEdit"
-          class="w-full px-4 py-2 text-left border-b border-border dark:border-border-dark hover:bg-purple-400/10 dark:hover:bg-border-dark/50 flex items-center gap-1 dark:text-gray-300"
-        >
-          <span class="w-5 text-center">✎</span> Редактировать
-        </button>
-        <button
-          @click="handleDelete"
-          class="w-full px-4 py-2 text-left hover:bg-purple-400/10 dark:hover:bg-border-dark/50 flex items-center gap-1 text-red-600 dark:text-red-400"
-        >
-          <span class="w-5 text-center">🗑</span> Удалить
-        </button>
-      </div>
-    </div>
-
     <!-- Обложка -->
     <div
       class="bg-purple-100 dark:bg-border-dark flex-shrink-0 relative overflow-hidden"
@@ -53,19 +29,13 @@
     <div class="px-2 py-3 flex-1 relative">
       <div class="flex justify-between">
         <div class="flex-1 pr-1">
-          <p class="text-xs leading-3 text-gray-500 dark:text-gray-400">
-            {{ book.author }}
-          </p>
           <p
-            class="text-sm leading-5 font-medium text-gray-800 dark:text-gray-200 tracking-tight line-clamp-3"
+            class="text-base leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
           >
-            {{ book.title }}
+            {{ book.title || "—" }}
           </p>
-          <p
-            v-if="book.publisher"
-            class="text-xs text-gray-500 dark:text-gray-400"
-          >
-            {{ book.publisher }}
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            {{ book.author || "—" }}
           </p>
 
           <!-- Шесть кнопок приоритета (для обоих режимов) -->
@@ -80,22 +50,6 @@
               {{ p }}
             </button>
           </div>
-        </div>
-
-        <!-- Действия для сетки -->
-        <div v-if="isGrid" class="flex flex-col gap-1">
-          <button
-            @click.stop="handleEdit"
-            class="p-1 hover:bg-purple-700/10 dark:hover:bg-border-dark rounded-lg transition-colors dark:text-gray-400"
-          >
-            <span class="text-lg">✎</span>
-          </button>
-          <button
-            @click.stop="handleDelete"
-            class="p-1 hover:bg-purple-700/10 dark:hover:bg-border-dark rounded-lg transition-colors dark:text-gray-400"
-          >
-            <span class="text-base">🗑</span>
-          </button>
         </div>
       </div>
     </div>
@@ -117,7 +71,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["edit", "delete", "updatePriority"]);
+const emit = defineEmits(["edit", "favorite", "delete", "click"]);
+
+const handleCardClick = () => {
+  emit("click", props.book);
+};
 
 const menuOpen = ref(false);
 const menuRef = ref(null);

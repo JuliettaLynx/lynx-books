@@ -1,9 +1,9 @@
 <template>
   <div
-    class="border border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark cursor-pointer rounded-lg dark:text-white relative"
+    class="border border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark cursor-pointer rounded-lg dark:text-white relative min-h-36"
     :class="[isGrid ? 'flex' : '']"
+    @click="handleCardClick"
   >
-    <!-- Три точки (только для плитки) - поверх обложки  -->
     <div v-if="!isGrid" class="absolute top-1 right-2 z-10 h-6">
       <BookActions
         :book="book"
@@ -55,23 +55,16 @@
     </div>
 
     <!-- Информация о книге -->
-    <div class="px-2 py-3 flex-1 relative">
+    <div class="px-2 py-2 flex-1 relative">
       <div class="flex justify-between">
         <div class="flex-1 pr-1 inline-block">
-          <p class="text-xs leading-3 text-gray-500 dark:text-gray-400">
-            {{ book.author }}
-          </p>
           <p
-            class="text-sm leading-5 font-medium text-gray-800 dark:text-gray-200 tracking-tight line-clamp-3"
+            class="text-base leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
           >
-            {{ book.title }}
+            {{ book.title || "—" }}
           </p>
-          <!-- Издательство (всегда строка) -->
-          <p
-            v-if="book.publisher"
-            class="text-xs text-gray-500 dark:text-gray-400"
-          >
-            {{ book.publisher }}
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            {{ book.author || "—" }}
           </p>
 
           <!-- Формат и статус (только для списка) -->
@@ -133,7 +126,11 @@ const props = defineProps({
   },
 });
 
-defineEmits(["edit", "favorite", "delete"]);
+const emit = defineEmits(["edit", "favorite", "delete", "click"]);
+
+const handleCardClick = () => {
+  emit("click", props.book);
+};
 
 // Функция для получения эмодзи в зависимости от формата
 const getFormatEmoji = (format) => {

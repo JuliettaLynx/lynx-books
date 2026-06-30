@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="isOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-[60] p-4"
       @click.self="handleClose"
     >
       <div
@@ -37,14 +37,17 @@
             v-if="form.status === 'прочитано'"
             v-model="form.rating"
           />
-          <BookReview v-model="form.review" />
+          <BookReview
+            v-if="form.status === 'прочитано'"
+            v-model="form.review"
+          />
           <BookDescription v-model="form.description" />
         </div>
 
         <ModalActions
           :is-edit="!!bookToEdit?.id"
-          @reset="resetForm"
           @submit="handleSubmit"
+          @delete="handleDelete"
         />
       </div>
     </div>
@@ -70,7 +73,7 @@ const props = defineProps({
   bookToEdit: Object,
 });
 
-const emit = defineEmits(["close", "save"]);
+const emit = defineEmits(["close", "save", "delete"]);
 
 // Состояния для обложки
 const coverPreview = ref(null);
@@ -193,6 +196,10 @@ const handleSubmit = () => {
 
   emit("save", bookData);
   handleClose();
+};
+
+const handleDelete = () => {
+  emit("delete", props.bookToEdit);
 };
 
 // Удаление обложки

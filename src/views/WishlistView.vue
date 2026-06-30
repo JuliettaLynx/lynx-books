@@ -100,6 +100,7 @@
             :key="book.id"
             :book="book"
             :is-grid="displayMode === 'list'"
+            @click="openEditModal(book)"
             @edit="openEditModal"
             @delete="openDeleteModal"
             @updatePriority="handleUpdatePriority"
@@ -111,7 +112,7 @@
     <IconButton
       icon="+"
       variant="primary"
-      class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-accent/60 text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+      class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
       @click="openAddModal"
     />
 
@@ -120,7 +121,9 @@
       :book-to-edit="editingBook"
       @close="closeModal"
       @save="saveBook"
+      @delete="openDeleteModal"
     />
+
     <DeleteModal
       :is-open="isDeleteModalOpen"
       title="Удалить книгу из вишлиста?"
@@ -300,6 +303,7 @@ const confirmDelete = async () => {
     }
   }
   closeDeleteModal();
+  closeModal();
 };
 
 const handleUpdatePriority = async (id, priority) => {

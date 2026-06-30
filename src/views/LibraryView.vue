@@ -140,7 +140,8 @@
         :class="{
           'grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5':
             displayMode === 'grid',
-          'flex flex-col gap-3': displayMode === 'list',
+          'grid gap-3 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3':
+            displayMode === 'list',
         }"
       >
         <BookCard
@@ -148,38 +149,41 @@
           :key="book.id"
           :book="book"
           :is-grid="displayMode === 'list'"
+          @click="openEditModal(book)"
           @edit="openEditModal"
           @favorite="handleToggleFavorite"
           @delete="openDeleteModal"
         />
-        <DeleteModal
-          :is-open="isDeleteModalOpen"
-          title="Удалить книгу?"
-          message="Это действие нельзя отменить"
-          confirm-text="Удалить"
-          cancel-text="Отмена"
-          :danger="true"
-          @close="closeDeleteModal"
-          @confirm="confirmDelete"
-        />
       </div>
+
+      <!-- Кнопка добавления -->
+      <IconButton
+        icon="+"
+        variant="primary"
+        class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+        @click="openModal"
+      />
+
+      <!-- Модальное окно -->
+      <BookModal
+        :is-open="isModalOpen"
+        :book-to-edit="editingBook"
+        @close="closeModal"
+        @save="saveBook"
+        @delete="openDeleteModal"
+      />
+
+      <DeleteModal
+        :is-open="isDeleteModalOpen"
+        title="Удалить книгу?"
+        message="Это действие нельзя отменить"
+        confirm-text="Удалить"
+        cancel-text="Отмена"
+        :danger="true"
+        @close="closeDeleteModal"
+        @confirm="confirmDelete"
+      />
     </div>
-
-    <!-- Кнопка добавления -->
-    <IconButton
-      icon="+"
-      variant="primary"
-      class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-accent/60 text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
-      @click="openModal"
-    />
-
-    <!-- Модальное окно -->
-    <BookModal
-      :is-open="isModalOpen"
-      :book-to-edit="editingBook"
-      @close="closeModal"
-      @save="saveBook"
-    />
   </div>
 </template>
 
@@ -406,6 +410,7 @@ const confirmDelete = async () => {
     }
   }
   closeDeleteModal();
+  closeModal();
 };
 
 // Сохранение книги
