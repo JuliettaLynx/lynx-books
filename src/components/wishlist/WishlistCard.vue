@@ -37,6 +37,9 @@
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ book.author || "—" }}
           </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            {{ book.publisher }}
+          </p>
 
           <!-- Шесть кнопок приоритета (для обоих режимов) -->
           <div class="flex gap-1 mt-2">

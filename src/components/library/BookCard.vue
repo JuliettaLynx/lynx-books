@@ -17,7 +17,11 @@
     <!-- Обложка -->
     <div
       class="bg-purple-100 dark:bg-border-dark flex-shrink-0 relative overflow-hidden"
-      :class="isGrid ? 'w-24 rounded-l-lg' : 'h-60 rounded-t-lg'"
+      :class="
+        isGrid
+          ? 'w-24 rounded-l-lg'
+          : 'h-72 rounded-t-lg max-[420px]:h-64 max-[390px]:h-60 max-[370px]:h-56 max-[360px]:h-52 max-[340px]:h-48 max-[310px]:h-44'
+      "
     >
       <!-- Размытый фон (только если есть обложка) -->
       <div
@@ -65,6 +69,9 @@
           </p>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ book.author || "—" }}
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            {{ book.publisher }}
           </p>
 
           <!-- Формат и статус (только для списка) -->

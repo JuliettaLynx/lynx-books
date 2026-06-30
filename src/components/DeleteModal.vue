@@ -24,7 +24,7 @@
             :class="[
               'flex-1 py-2 px-3 rounded-lg transition-colors',
               danger
-                ? 'bg-red-500 hover:bg-red-600 text-white dark:text-border-dark'
+                ? 'bg-red-500 hover:bg-red-600 text-white'
                 : 'bg-accent hover:bg-accent/80 text-white dark:text-border-dark',
             ]"
           >
