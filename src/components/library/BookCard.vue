@@ -59,23 +59,27 @@
     </div>
 
     <!-- Информация о книге -->
-    <div class="px-2 py-2 flex-1 relative">
+    <div class="px-2 flex-1 relative">
       <div class="flex justify-between">
-        <div class="flex-1 pr-1 inline-block">
+        <div class="flex-1 py-1" :class="isGrid ? 'pt-4' : 'pt-2'">
           <p
-            class="text-base leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
+            class="text-base max-[400px]:text-sm text-center leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
           >
             {{ book.title || "—" }}
           </p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            class="text-sm max-[400px]:text-xs text-center text-gray-500 dark:text-gray-400"
+          >
             {{ book.author || "—" }}
           </p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            class="text-sm max-[400px]:text-xs text-center text-gray-500 dark:text-gray-400"
+          >
             {{ book.publisher }}
           </p>
 
           <!-- Формат и статус (только для списка) -->
-          <div v-if="isGrid" class="pt-1">
+          <div v-if="isGrid" class="pt-3 text-center">
             <span
               class="text-xs px-2 py-1 rounded-lg"
               :class="{
@@ -93,15 +97,23 @@
             </span>
           </div>
 
-          <!-- Рейтинг (только для прочитанных) -->
           <div
-            v-if="book.status === 'прочитано' && book.rating !== 0"
-            class="text-yellow-400 dark:text-yellow-500"
+            v-if="book.status === 'прочитано' && book.rating !== 0 && !isGrid"
+            class="text-yellow-400 dark:text-yellow-500 text-center"
           >
             <span v-for="n in 5" :key="n" class="text-lg">
               {{ n <= (book.rating || 0) ? "★" : "☆" }}
             </span>
           </div>
+        </div>
+
+        <div
+          v-if="book.status === 'прочитано' && book.rating !== 0 && isGrid"
+          class="text-yellow-400 dark:text-yellow-500 flex flex-col absolute pt-2"
+        >
+          <span v-for="n in 5" :key="n" class="text-lg leading-6">
+            {{ n <= (book.rating || 0) ? "★" : "☆" }}
+          </span>
         </div>
 
         <!-- Действия с книгой (для карточек) -->

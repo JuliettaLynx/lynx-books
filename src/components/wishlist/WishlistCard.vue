@@ -7,7 +7,11 @@
     <!-- Обложка -->
     <div
       class="bg-purple-100 dark:bg-border-dark flex-shrink-0 relative overflow-hidden"
-      :class="isGrid ? 'w-24 rounded-l-lg' : 'h-60 rounded-t-lg'"
+      :class="
+        isGrid
+          ? 'w-24 rounded-l-lg'
+          : 'h-72 rounded-t-lg max-[420px]:h-64 max-[390px]:h-60 max-[370px]:h-56 max-[360px]:h-52 max-[340px]:h-48 max-[310px]:h-44'
+      "
     >
       <div
         v-if="book.cover"
@@ -26,23 +30,27 @@
     </div>
 
     <!-- Информация -->
-    <div class="px-2 py-3 flex-1 relative">
+    <div class="px-2 flex-1 relative">
       <div class="flex justify-between">
-        <div class="flex-1 pr-1">
+        <div class="flex-1 py-2" :class="isGrid ? 'pt-4' : 'pt-2'">
           <p
-            class="text-base leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
+            class="text-base max-[400px]:text-sm text-center leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
           >
             {{ book.title || "—" }}
           </p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            class="text-sm max-[400px]:text-xs text-center text-gray-500 dark:text-gray-400"
+          >
             {{ book.author || "—" }}
           </p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            class="text-sm max-[400px]:text-xs text-center text-gray-500 dark:text-gray-400"
+          >
             {{ book.publisher }}
           </p>
 
           <!-- Шесть кнопок приоритета (для обоих режимов) -->
-          <div class="flex gap-1 mt-2">
+          <div class="flex justify-center gap-1 mt-2">
             <button
               v-for="p in 5"
               :key="p"
