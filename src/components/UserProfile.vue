@@ -79,8 +79,8 @@
       </div>
 
       <!-- Настройки темы -->
-      <div class="p-4 border-b border-border dark:border-border-dark">
-        <div class="grid grid-cols-6 gap-4">
+      <div class="p-2">
+        <div class="px-2 py-1 grid grid-cols-6 gap-4">
           <p class="col-span-3">Тема:</p>
           <button
             @click.stop="setTheme('light')"
@@ -121,8 +121,8 @@
       </div>
 
       <!-- Настройки режима отображения -->
-      <div class="p-4 border-b border-border dark:border-border-dark">
-        <div class="grid grid-cols-6 gap-4">
+      <div class="p-2 border-b border-border dark:border-border-dark">
+        <div class="px-2 py-1 grid grid-cols-6 gap-4">
           <p class="col-span-4">Отображение книг:</p>
           <button
             @click.stop="setDisplayMode('grid')"
@@ -154,7 +154,7 @@
       <div class="p-2 border-b border-border dark:border-border-dark">
         <button
           @click.stop="openAboutModal"
-          class="w-full px-4 py-2 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 transition-colors"
+          class="w-full px-2 py-1 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 transition-colors"
         >
           <span class="flex-1 text-base">О нас</span>
         </button>
@@ -164,21 +164,21 @@
       <div class="p-2">
         <button
           @click.stop="openSection('password')"
-          class="w-full px-4 py-2 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 transition-colors"
+          class="w-full px-2 py-1 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 transition-colors"
         >
           <span class="flex-1 text-base">Сменить пароль</span>
         </button>
 
         <button
           @click.stop="openLogoutConfirm"
-          class="w-full px-4 py-1 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
+          class="w-full px-2 py-1 text-left hover:bg-border/50 dark:hover:bg-border-dark/40 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
         >
           <span class="flex-1 text-base">Выйти</span>
         </button>
 
         <button
           @click.stop="openDeleteAccountConfirm"
-          class="w-full px-4 py-1 text-left hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
+          class="w-full px-2 py-1 text-left hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
         >
           <span class="flex-1 text-base">Удалить аккаунт</span>
         </button>
