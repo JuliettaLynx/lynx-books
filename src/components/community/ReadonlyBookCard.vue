@@ -1,20 +1,9 @@
 <template>
   <div
-    class="h-full border border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark cursor-pointer rounded-lg dark:text-white relative"
+    class="h-full border border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark cursor-pointer rounded-lg dark:text-white relative min-h-36"
     :class="[isGrid ? 'flex' : '']"
   >
-    <!-- Три точки (только для плитки) - поверх обложки  -->
-    <div v-if="!isGrid && !readonly" class="absolute top-1 right-2 z-10 h-6">
-      <BookActions
-        :book="book"
-        :is-grid="isGrid"
-        @favorite="$emit('favorite', $event)"
-        @edit="$emit('edit', $event)"
-        @delete="$emit('delete', $event)"
-      />
-    </div>
-
-    <!-- Иконка избранного для библиотеки (readonly) -->
+    <!-- Иконка избранного для библиотеки -->
     <div
       v-if="readonly && isLibrary && book.isFavorite"
       class="absolute top-1 right-2 z-10 text-red-500 text-lg"
@@ -22,7 +11,7 @@
       ❤️
     </div>
 
-    <!-- Иконка приоритета для вишлиста (readonly) -->
+    <!-- Иконка приоритета для вишлиста -->
     <div
       v-if="readonly && !isLibrary && book.priority"
       class="absolute top-1 right-2 z-10 bg-accent/50 text-white dark:text-black rounded-lg w-6 h-6 flex items-center justify-center text-xs font-bold"
@@ -33,7 +22,11 @@
     <!-- Обложка -->
     <div
       class="bg-purple-100 dark:bg-border-dark flex-shrink-0 relative overflow-hidden"
-      :class="isGrid ? 'w-24 rounded-l-lg' : 'h-60 rounded-t-lg'"
+      :class="
+        isGrid
+          ? 'w-24 rounded-l-lg'
+          : 'h-72 rounded-t-lg max-[420px]:h-64 max-[390px]:h-60 max-[370px]:h-56 max-[360px]:h-52 max-[340px]:h-48 max-[310px]:h-44'
+      "
     >
       <!-- Размытый фон (только если есть обложка) -->
       <div
@@ -66,32 +59,35 @@
         class="h-full relative z-0 flex items-center justify-center text-4xl"
       >
         <img v-if="book.cover" :src="book.cover" class="h-full" alt="Обложка" />
-        <span v-else>📷</span>
+        <img v-else :src="defaultCover" />
       </div>
     </div>
 
     <!-- Информация о книге -->
-    <div class="px-2 py-3 flex-1 relative">
+    <div class="px-2 flex-1 relative">
       <div class="flex justify-between">
-        <div class="flex-1 pr-1 inline-block">
-          <p class="text-xs leading-3 text-gray-500 dark:text-gray-400">
-            {{ book.author }}
-          </p>
+        <div
+          class="flex-1 py-1"
+          :class="!isLibrary && isGrid ? 'pt-8' : isGrid ? 'pt-4' : 'pt-2'"
+        >
           <p
-            class="text-sm leading-5 font-medium text-gray-800 dark:text-gray-200 tracking-tight line-clamp-3"
+            class="text-base max-[400px]:text-sm text-center leading-5 text-gray-800 dark:text-gray-200 line-clamp-3"
           >
-            {{ book.title }}
+            {{ book.title || "—" }}
           </p>
-          <!-- Издательство (всегда строка) -->
           <p
-            v-if="book.publisher"
-            class="text-xs text-gray-500 dark:text-gray-400"
+            class="text-sm max-[400px]:text-xs text-center text-gray-500 dark:text-gray-400"
+          >
+            {{ book.author || "—" }}
+          </p>
+          <p
+            class="text-sm max-[400px]:text-xs text-center text-gray-500 dark:text-gray-400"
           >
             {{ book.publisher }}
           </p>
 
           <!-- Формат и статус (только для списка) -->
-          <div v-if="isGrid" class="pt-1">
+          <div v-if="isGrid" class="pt-3 text-center">
             <span
               class="text-xs px-2 py-1 rounded-lg"
               :class="{
@@ -111,8 +107,8 @@
 
           <!-- Рейтинг (только для прочитанных) -->
           <div
-            v-if="book.status === 'прочитано' && book.rating !== 0"
-            class="text-yellow-400 dark:text-yellow-500"
+            v-if="book.status === 'прочитано' && book.rating !== 0 && !isGrid"
+            class="text-yellow-400 dark:text-yellow-500 text-center"
           >
             <span v-for="n in 5" :key="n" class="text-lg">
               {{ n <= (book.rating || 0) ? "★" : "☆" }}
@@ -120,15 +116,13 @@
           </div>
         </div>
 
-        <!-- Действия с книгой (для карточек) -->
-        <div v-if="isGrid && !readonly">
-          <BookActions
-            :book="book"
-            :is-grid="isGrid"
-            @favorite="$emit('favorite', $event)"
-            @edit="$emit('edit', $event)"
-            @delete="$emit('delete', $event)"
-          />
+        <div
+          v-if="book.status === 'прочитано' && book.rating !== 0 && isGrid"
+          class="text-yellow-400 dark:text-yellow-500 flex flex-col absolute pt-2"
+        >
+          <span v-for="n in 5" :key="n" class="text-lg leading-6">
+            {{ n <= (book.rating || 0) ? "★" : "☆" }}
+          </span>
         </div>
       </div>
     </div>
@@ -138,6 +132,9 @@
 <script setup>
 import { computed } from "vue";
 import BookActions from "../library/BookActions.vue";
+import { DEFAULT_COVER } from "../../constants/constants.js";
+
+const defaultCover = DEFAULT_COVER;
 
 const props = defineProps({
   book: {
@@ -170,6 +167,6 @@ const getFormatEmoji = (format) => {
     аудио: "🎧",
   };
 
-  return formatMap[format] || "📚";
+  return formatMap[format];
 };
 </script>

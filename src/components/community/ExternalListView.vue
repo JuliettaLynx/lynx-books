@@ -2,9 +2,9 @@
   <Teleport to="body">
     <div
       v-if="isOpen"
-      class="fixed pb-14 inset-0 bg-black bg-opacity-80 z-40 overflow-auto"
+      class="fixed pb-14 inset-0 bg-black bg-opacity-90 z-40 overflow-auto"
     >
-      <div class="relative w-full overflow-auto">
+      <div class="relative w-full">
         <!-- Шапка с заголовком и кнопкой закрытия -->
         <div
           class="sticky px-3 top-0 z-20 bg-white dark:bg-bg-primary-dark pb-3 mb-4"
@@ -129,9 +129,10 @@
           v-else
           class="px-4"
           :class="{
-            'grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5':
+            'grid gap-3 grid-cols-2 min-[700px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6':
               displayMode === 'grid',
-            'flex flex-col gap-3': displayMode === 'list',
+            'grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1000px]:grid-cols-3 min-[1300px]:grid-cols-4':
+              displayMode === 'list',
           }"
         >
           <div

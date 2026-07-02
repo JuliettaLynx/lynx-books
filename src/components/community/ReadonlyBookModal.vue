@@ -164,6 +164,9 @@
 
 <script setup>
 import { computed } from "vue";
+import { DEFAULT_COVER } from "../../constants/constants.js";
+
+const defaultCover = DEFAULT_COVER;
 
 const props = defineProps({
   isOpen: Boolean,
@@ -173,8 +176,6 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 
 const isLibrary = computed(() => props.listType === "library");
-
-const defaultCover = "/default-book-cover.png";
 
 const close = () => emit("close");
 </script>
