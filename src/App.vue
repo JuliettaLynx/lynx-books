@@ -8,7 +8,7 @@
       <!-- Overlay для sidebar -->
       <div
         v-if="isSidebarOpen"
-        class="fixed inset-0 z-40 bg-black/30 lg:hidden"
+        class="fixed inset-0 z-50 hidden lg:block"
         @click="isSidebarOpen = false"
       ></div>
 
@@ -23,10 +23,7 @@
       />
 
       <!-- Контент -->
-      <div
-        class="transition-all duration-300"
-        :class="isSidebarOpen ? 'lg:ml-72' : ''"
-      >
+      <div class="transition-all duration-300">
         <router-view />
       </div>
 

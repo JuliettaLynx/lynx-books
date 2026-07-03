@@ -1,13 +1,13 @@
 <template>
   <div
-    class="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-bg-secondary-dark shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-border dark:border-border-dark flex flex-col"
+    class="fixed inset-y-0 left-0 z-50 w-72 bg-white/90 dark:bg-bg-secondary-dark/90 shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-border dark:border-border-dark flex flex-col"
     :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <!-- Заголовок меню -->
     <div
       class="border-b pt-3 pb-4 border-border dark:border-border-dark flex justify-center"
     >
-      <h2 class="text-lg font-bold dark:text-white">Меню</h2>
+      <h2 class="text-lg tracking-wider font-bold dark:text-white">Меню</h2>
     </div>
 
     <!-- Навигация -->

@@ -26,7 +26,6 @@
       <!-- Заголовок страницы -->
       <h1
         class="text-xl tracking-wider font-bold dark:text-white transition-all duration-300 truncate"
-        :class="isSidebarOpen ? 'ml-72' : ''"
       >
         {{ pageTitle }}
       </h1>
