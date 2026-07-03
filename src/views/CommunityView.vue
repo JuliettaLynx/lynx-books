@@ -2,25 +2,19 @@
   <div class="min-h-screen bg-white dark:bg-bg-primary-dark">
     <!-- Шапка -->
     <div
-      class="sticky top-0 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark"
+      class="sticky top-0 pl-4 p-1.5 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)] transition-colors duration-200"
     >
-      <div class="p-3 flex justify-between items-center">
-        <h1 class="text-xl font-bold dark:text-white">Сообщество</h1>
-        <div class="flex gap-2">
-          <IconButton icon="⚙️" @click="privacyModalOpen = true" />
-          <IconButton icon="🔗" @click="shareModalOpen = true" />
-          <UserProfile />
-        </div>
-      </div>
-      <div class="p-3 pt-0">
-        <SearchInput v-model="searchQuery" placeholder="Поиск подписок..." />
+      <div class="flex justify-between items-center">
+        <SearchInput v-model="searchQuery" placeholder="Имя пользователя" />
+        <IconButton icon="⚙️" @click="privacyModalOpen = true" class="px-3" />
+        <IconButton icon="🔗" @click="shareModalOpen = true" class="pr-3" />
       </div>
 
       <IconButton
         icon="+"
         variant="primary"
         @click="addModalOpen = true"
-        class="fixed z-20 right-4 bottom-20 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center"
+        class="fixed z-20 right-4 bottom-20 lg:bottom-5 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center"
       />
     </div>
 
@@ -33,7 +27,7 @@
     </div>
     <div
       v-else-if="filteredSubscriptions.length === 0"
-      class="text-center py-8 text-gray-500"
+      class="text-center p-8 text-gray-500"
     >
       У вас пока нет подписок. Используйте кнопку "+", чтобы найти друзей.
     </div>

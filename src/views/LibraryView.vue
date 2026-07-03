@@ -4,108 +4,106 @@
   >
     <!-- Шапка -->
     <div
-      class="sticky top-0 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark text-black dark:text-white shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)] transition-colors duration-200"
+      class="sticky top-0 pl-4 p-1.5 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark text-black dark:text-white shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)] transition-colors duration-200"
     >
-      <div class="p-3">
-        <div class="flex justify-between items-center">
-          <h1 class="text-xl tracking-wider font-bold dark:text-white">
-            Библиотека
-          </h1>
-          <div class="flex gap-1 text-black dark:text-white">
-            <!-- Кнопка сортировки -->
-            <div class="relative" ref="sortMenuRef">
-              <IconButton
-                icon="🔽"
-                :variant="'primary'"
-                @click="toggleSortMenu"
-                class="text-xl"
-              />
-              <div
-                v-if="sortMenuOpen"
-                class="absolute right-0 mt-2 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
-              >
-                <div class="p-2">
-                  <div
-                    v-for="category in sortCategories"
-                    :key="category.key"
-                    class="mb-2"
-                  >
-                    <div
-                      class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
-                    >
-                      {{ category.label }}
-                    </div>
-                    <button
-                      v-for="option in category.options"
-                      :key="option.value"
-                      @click="setSort(option.value)"
-                      class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                      :class="{
-                        'bg-purple-200 dark:bg-accent/30':
-                          currentSort === option.value,
-                      }"
-                    >
-                      {{ option.label }}
-                    </button>
-                  </div>
-                  <hr class="my-1 border-border dark:border-border-dark" />
-                  <button
-                    @click="setSort(null)"
-                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                  >
-                    Без сортировки
-                  </button>
-                </div>
-              </div>
-            </div>
+      <div class="flex justify-between items-center">
+        <!-- Поиск с debounce -->
+        <SearchInput v-model="searchQuery" placeholder="Название или автор" />
 
-            <!-- Кнопка фильтра -->
-            <div class="relative" ref="filterMenuRef">
-              <IconButton
-                :icon="filterIcon"
-                :variant="'primary'"
-                @click="toggleFilterMenu"
-                class="text-xl"
-              />
-              <div
-                v-if="filterMenuOpen"
-                class="absolute right-0 mt-2 w-48 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
-              >
-                <div class="p-2">
-                  <button
-                    v-for="option in filterOptions"
-                    :key="option.value"
-                    @click="setFilter(option.value)"
-                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                    :class="{
-                      'bg-purple-200 dark:bg-accent/30':
-                        currentFilter === option.value,
-                    }"
-                  >
-                    {{ option.label }}
-                  </button>
-                </div>
-              </div>
-            </div>
+        <!-- Overlay -->
+        <div
+          v-if="sortMenuOpen"
+          class="fixed inset-0 z-20 block"
+          @click="sortMenuOpen = false"
+        ></div>
+        <div
+          v-if="filterMenuOpen"
+          class="fixed inset-0 z-20 block"
+          @click="filterMenuOpen = false"
+        ></div>
 
-            <!-- Иконка профиля -->
-            <UserProfile />
+        <!-- Кнопка сортировки -->
+        <div class="relative px-2" ref="sortMenuRef">
+          <IconButton
+            icon="🔽"
+            :variant="'primary'"
+            @click="toggleSortMenu"
+            class="text-xl"
+          />
+          <div
+            v-if="sortMenuOpen"
+            class="absolute right-0 mt-3 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+          >
+            <div class="p-2">
+              <div
+                v-for="category in sortCategories"
+                :key="category.key"
+                class="mb-2"
+              >
+                <div
+                  class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
+                >
+                  {{ category.label }}
+                </div>
+                <button
+                  v-for="option in category.options"
+                  :key="option.value"
+                  @click="setSort(option.value)"
+                  class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                  :class="{
+                    'bg-purple-200 dark:bg-accent/30':
+                      currentSort === option.value,
+                  }"
+                >
+                  {{ option.label }}
+                </button>
+              </div>
+              <hr class="my-1 border-border dark:border-border-dark" />
+              <button
+                @click="setSort(null)"
+                class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+              >
+                Без сортировки
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Поиск с debounce -->
-        <SearchInput
-          v-model="searchQuery"
-          placeholder="Поиск по названию или автору..."
-          class="mt-3"
-        />
+        <!-- Кнопка фильтра -->
+        <div class="relative pr-2" ref="filterMenuRef">
+          <IconButton
+            :icon="filterIcon"
+            :variant="'primary'"
+            @click="toggleFilterMenu"
+            class="text-xl"
+          />
+          <div
+            v-if="filterMenuOpen"
+            class="absolute right-0 mt-3 w-48 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+          >
+            <div class="p-2">
+              <button
+                v-for="option in filterOptions"
+                :key="option.value"
+                @click="setFilter(option.value)"
+                class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                :class="{
+                  'bg-purple-200 dark:bg-accent/30':
+                    currentFilter === option.value,
+                }"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Кнопка добавления -->
       <IconButton
         icon="+"
         variant="primary"
-        class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
         @click="openModal"
       />
     </div>
@@ -140,7 +138,7 @@
         :class="{
           'grid gap-3 grid-cols-2 min-[700px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6':
             displayMode === 'grid',
-          'grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1000px]:grid-cols-3 min-[1300px]:grid-cols-4':
+          'grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1300px]:grid-cols-4':
             displayMode === 'list',
         }"
       >
@@ -190,7 +188,6 @@ import LoadingSpinner from "../components/LoadingSpinner.vue";
 import SearchInput from "../components/library/SearchInput.vue";
 import BookCard from "../components/library/BookCard.vue";
 import BookModal from "../components/library/BookModal.vue";
-import UserProfile from "../components/UserProfile.vue";
 import DeleteModal from "../components/DeleteModal.vue";
 
 const libraryStore = useLibraryStore();

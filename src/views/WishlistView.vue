@@ -4,73 +4,70 @@
   >
     <!-- Шапка -->
     <div
-      class="sticky top-0 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark text-black dark:text-white shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)]"
+      class="sticky top-0 pl-4 p-1.5 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark text-black dark:text-white shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)]"
     >
-      <div class="p-3">
-        <div class="flex justify-between items-center">
-          <h1 class="text-xl tracking-wider font-bold">Вишлист</h1>
-          <div class="flex gap-1">
-            <!-- Сортировка -->
-            <div class="relative" ref="sortMenuRef">
-              <IconButton
-                icon="🔽"
-                variant="primary"
-                @click="toggleSortMenu"
-                class="text-xl"
-              />
-              <div
-                v-if="sortMenuOpen"
-                class="absolute right-0 mt-2 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
-              >
-                <div class="p-2">
-                  <div
-                    v-for="category in sortCategories"
-                    :key="category.key"
-                    class="mb-2"
-                  >
-                    <div
-                      class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
-                    >
-                      {{ category.label }}
-                    </div>
-                    <button
-                      v-for="option in category.options"
-                      :key="option.value"
-                      @click="setSort(option.value)"
-                      class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                      :class="{
-                        'bg-purple-200 dark:bg-accent/30':
-                          currentSort === option.value,
-                      }"
-                    >
-                      {{ option.label }}
-                    </button>
-                  </div>
-                  <hr class="my-1 border-border dark:border-border-dark" />
-                  <button
-                    @click="setSort(null)"
-                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                  >
-                    Без сортировки
-                  </button>
-                </div>
-              </div>
-            </div>
+      <div class="flex justify-between items-center">
+        <SearchInput v-model="searchQuery" placeholder="Название или автор" />
 
-            <UserProfile />
+        <!-- Overlay -->
+        <div
+          v-if="sortMenuOpen"
+          class="fixed inset-0 z-20 block"
+          @click="sortMenuOpen = false"
+        ></div>
+
+        <!-- Сортировка -->
+        <div class="relative px-2" ref="sortMenuRef">
+          <IconButton
+            icon="🔽"
+            variant="primary"
+            @click="toggleSortMenu"
+            class="text-xl"
+          />
+          <div
+            v-if="sortMenuOpen"
+            class="absolute right-0 w-56 mt-3 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+          >
+            <div class="p-2">
+              <div
+                v-for="category in sortCategories"
+                :key="category.key"
+                class="mb-2"
+              >
+                <div
+                  class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
+                >
+                  {{ category.label }}
+                </div>
+                <button
+                  v-for="option in category.options"
+                  :key="option.value"
+                  @click="setSort(option.value)"
+                  class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                  :class="{
+                    'bg-purple-200 dark:bg-accent/30':
+                      currentSort === option.value,
+                  }"
+                >
+                  {{ option.label }}
+                </button>
+              </div>
+              <hr class="my-1 border-border dark:border-border-dark" />
+              <button
+                @click="setSort(null)"
+                class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+              >
+                Без сортировки
+              </button>
+            </div>
           </div>
         </div>
-        <SearchInput
-          v-model="searchQuery"
-          placeholder="Поиск по названию или автору..."
-          class="mt-3"
-        />
       </div>
 
       <IconButton
         icon="+"
         variant="primary"
-        class="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
         @click="openAddModal"
       />
     </div>

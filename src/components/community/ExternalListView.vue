@@ -7,110 +7,124 @@
       <div class="relative w-full">
         <!-- Шапка с заголовком и кнопкой закрытия -->
         <div
-          class="sticky px-3 top-0 z-20 bg-white dark:bg-bg-primary-dark pb-3 mb-4"
+          class="sticky px-3 top-0 z-20 bg-white dark:bg-bg-primary-dark text-black dark:text-white pb-3 mb-4"
         >
+          <h2
+            class="text-xl relative top-3.5 mb-2.5 flex justify-center tracking-wider font-bold dark:text-white"
+          >
+            {{ isLibrary ? "Библиотека" : "Вишлист" }}
+            {{ userName || userId }}
+          </h2>
+
+          <IconButton
+            icon="✕"
+            variant="primary"
+            @click="close"
+            class="absolute right-4 top-2 text-xl dark:text-white"
+          />
+
           <div class="flex pt-3 justify-between items-center">
-            <h2 class="text-xl font-bold dark:text-white">
-              {{ isLibrary ? "Библиотека" : "Вишлист" }}
-              {{ userName || userId }}
-            </h2>
-            <div class="flex gap-2 text-black dark:text-white">
-              <!-- Кнопки сортировки / фильтра / переключения вида -->
-              <div class="relative">
-                <span ref="sortButtonRef">
-                  <IconButton
-                    icon="🔽"
-                    variant="primary"
-                    @click="toggleSortMenu"
-                    class="text-xl"
-                  />
-                </span>
-                <div
-                  v-if="sortMenuOpen"
-                  ref="sortMenuRef"
-                  class="absolute right-0 mt-2 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
-                >
-                  <div class="p-2">
+            <SearchInput
+              v-model="searchQuery"
+              placeholder="Название или автор"
+              class="mt-3 pl-1"
+            />
+
+            <!-- Overlay -->
+            <div
+              v-if="sortMenuOpen"
+              class="fixed inset-0 z-20 block"
+              @click="sortMenuOpen = false"
+            ></div>
+            <div
+              v-if="filterMenuOpen"
+              class="fixed inset-0 z-20 block"
+              @click="filterMenuOpen = false"
+            ></div>
+
+            <!-- Кнопки сортировки / фильтра -->
+            <div class="relative px-2">
+              <span ref="sortButtonRef">
+                <IconButton
+                  icon="🔽"
+                  variant="primary"
+                  @click="toggleSortMenu"
+                  class="text-xl"
+                />
+              </span>
+              <div
+                v-if="sortMenuOpen"
+                ref="sortMenuRef"
+                class="absolute right-0 mt-3 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+              >
+                <div class="p-2">
+                  <div
+                    v-for="category in sortCategories"
+                    :key="category.key"
+                    class="mb-2"
+                  >
                     <div
-                      v-for="category in sortCategories"
-                      :key="category.key"
-                      class="mb-2"
+                      class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
                     >
-                      <div
-                        class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1"
-                      >
-                        {{ category.label }}
-                      </div>
-                      <button
-                        v-for="opt in category.options"
-                        :key="opt.value"
-                        @click="setSort(opt.value)"
-                        class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                        :class="{
-                          'bg-purple-200 dark:bg-accent/30':
-                            currentSort === opt.value,
-                        }"
-                      >
-                        {{ opt.label }}
-                      </button>
+                      {{ category.label }}
                     </div>
-
-                    <hr class="my-1 border-border dark:border-border-dark" />
-
                     <button
-                      @click="setSort(null)"
-                      class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
-                    >
-                      Без сортировки
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="relative" v-if="isLibrary">
-                <span ref="filterButtonRef">
-                  <IconButton
-                    :icon="filterIcon"
-                    variant="primary"
-                    @click="toggleFilterMenu"
-                    class="text-xl"
-                  />
-                </span>
-                <div
-                  v-if="filterMenuOpen"
-                  ref="filterMenuRef"
-                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
-                >
-                  <div class="p-2">
-                    <button
-                      v-for="opt in filterOptions"
+                      v-for="opt in category.options"
                       :key="opt.value"
-                      @click="setFilter(opt.value)"
+                      @click="setSort(opt.value)"
                       class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
                       :class="{
                         'bg-purple-200 dark:bg-accent/30':
-                          currentFilter === opt.value,
+                          currentSort === opt.value,
                       }"
                     >
                       {{ opt.label }}
                     </button>
                   </div>
+
+                  <hr class="my-1 border-border dark:border-border-dark" />
+
+                  <button
+                    @click="setSort(null)"
+                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                  >
+                    Без сортировки
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <IconButton
-                icon="✕"
-                variant="primary"
-                @click="close"
-                class="text-xl dark:text-white"
-              />
+            <div class="relative pr-2" v-if="isLibrary">
+              <span ref="filterButtonRef">
+                <IconButton
+                  :icon="filterIcon"
+                  variant="primary"
+                  @click="toggleFilterMenu"
+                  class="text-xl"
+                />
+              </span>
+              <div
+                v-if="filterMenuOpen"
+                ref="filterMenuRef"
+                class="absolute right-0 mt-3 w-48 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
+              >
+                <div class="p-2">
+                  <button
+                    v-for="opt in filterOptions"
+                    :key="opt.value"
+                    @click="setFilter(opt.value)"
+                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                    :class="{
+                      'bg-purple-200 dark:bg-accent/30':
+                        currentFilter === opt.value,
+                    }"
+                  >
+                    {{ opt.label }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <SearchInput
-            v-model="searchQuery"
-            placeholder="Поиск по названию или автору..."
-            class="mt-3"
-          />
         </div>
 
         <LoadingSpinner v-if="loading" />
