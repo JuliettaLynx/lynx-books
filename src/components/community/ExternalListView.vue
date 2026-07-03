@@ -366,6 +366,10 @@ const updateDebouncedSearch = useDebounceFn((val) => {
   debouncedSearch.value = val;
 }, 300);
 
+watch(searchQuery, (value) => {
+  updateDebouncedSearch(value);
+});
+
 const toggleSortMenu = () => {
   sortMenuOpen.value = !sortMenuOpen.value;
   filterMenuOpen.value = false;

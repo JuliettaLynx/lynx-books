@@ -354,8 +354,8 @@ const searched = computed(() => {
   const query = debouncedSearch.value.toLowerCase();
   return filteredByStatus.value.filter(
     (book) =>
-      book.title.toLowerCase().includes(query) ||
-      book.author.toLowerCase().includes(query),
+      (book.title?.toLowerCase() ?? "").includes(query) ||
+      (book.author?.toLowerCase() ?? "").includes(query),
   );
 });
 
