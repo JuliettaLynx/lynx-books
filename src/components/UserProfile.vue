@@ -21,7 +21,7 @@
     <div
       v-if="isOpen"
       @click="isOpen = false"
-      class="fixed pb-14 inset-0 bg-black bg-opacity-60 z-30 overflow-auto"
+      class="fixed pb-14 inset-0 z-30 overflow-auto"
     ></div>
     <div
       v-if="isOpen"
@@ -191,6 +191,7 @@
         v-if="activeSection"
         class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4"
         @click.self="closeSection"
+        @click.stop
       >
         <div
           class="bg-white dark:bg-bg-secondary-dark w-full max-w-md rounded-2xl max-h-[90vh] flex flex-col"
@@ -345,6 +346,7 @@
         v-if="showAboutModal"
         class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4"
         @click="showAboutModal = false"
+        @click.stop
       >
         <div
           class="bg-white dark:bg-bg-secondary-dark w-full max-w-md rounded-2xl max-h-[90vh] flex flex-col shadow-2xl"
