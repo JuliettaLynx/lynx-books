@@ -20,7 +20,7 @@
       </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-4">
       <!-- Карточка библиотеки -->
       <div
         v-if="subscription.hasLibraryAccess"
@@ -30,16 +30,33 @@
         <div class="font-medium mb-2 flex justify-between items-center">
           <span>📚 Библиотека</span>
         </div>
-        <div class="flex gap-2 overflow-x-auto py-2 px-2">
+        <div ref="libraryContainerRef" class="flex gap-2 py-2 px-2">
           <div
-            v-for="book in libraryBooks.slice(0, 4)"
+            v-for="book in visibleLibraryBooks"
             :key="book.id"
-            class="w-16 flex-shrink-0"
+            class="w-16 flex-shrink-0 relative group"
+            @click.stop="$emit('open-book', { book, listType: 'library' })"
           >
             <img
               :src="book.cover || defaultCover"
               class="w-full aspect-[2/3] object-cover rounded transition-transform duration-200"
             />
+
+            <div
+              class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+            >
+              <div class="text-center text-white">
+                <div class="break-words w-16 text-[11px] tracking-[-0.04em]">
+                  {{ book.title }}
+                </div>
+                <div
+                  v-if="book.author"
+                  class="break-words w-16 text-[10px] opacity-80 font-thin"
+                >
+                  {{ book.author }}
+                </div>
+              </div>
+            </div>
           </div>
           <div v-if="libraryBooks.length === 0" class="text-sm text-gray-500">
             Нет книг
@@ -56,16 +73,35 @@
         <div class="font-medium mb-2 flex justify-between items-center">
           <span>⭐ Вишлист</span>
         </div>
-        <div class="flex gap-2 overflow-x-auto py-2 px-2">
+        <div ref="wishlistContainerRef" class="flex gap-2 py-2 px-2">
           <div
-            v-for="book in wishlistBooks.slice(0, 4)"
+            v-for="book in visibleWishlistBooks"
             :key="book.id"
-            class="w-16 flex-shrink-0"
+            class="w-16 flex-shrink-0 relative group"
+            @click.stop="$emit('open-book', { book, listType: 'wishlist' })"
           >
             <img
               :src="book.cover || defaultCover"
               class="w-full aspect-[2/3] object-cover rounded transition-transform duration-200"
             />
+
+            <div
+              class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+            >
+              <div
+                class="text-center text-white text-[11px] tracking-[-0.04em]"
+              >
+                <div class="break-words w-16">
+                  {{ book.title }}
+                </div>
+                <div
+                  v-if="book.author"
+                  class="break-words w-16 text-[10px] opacity-80"
+                >
+                  {{ book.author }}
+                </div>
+              </div>
+            </div>
           </div>
           <div v-if="wishlistBooks.length === 0" class="text-sm text-gray-500">
             Нет книг
@@ -87,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import DeleteModal from "../DeleteModal.vue";
 import { DEFAULT_AVATAR, DEFAULT_COVER } from "../../constants/constants.js";
 
@@ -96,12 +132,65 @@ const props = defineProps({
   libraryBooks: Array,
   wishlistBooks: Array,
 });
-const emit = defineEmits(["open-library", "open-wishlist", "unsubscribe"]);
+const emit = defineEmits([
+  "open-library",
+  "open-wishlist",
+  "unsubscribe",
+  "open-book",
+]);
 
 const showConfirm = ref(false);
 
 const defaultAvatar = DEFAULT_AVATAR;
 const defaultCover = DEFAULT_COVER;
+
+const libraryContainerRef = ref(null);
+const wishlistContainerRef = ref(null);
+const visibleCount = ref(10);
+const resizeObserver = ref(null);
+
+const ITEM_WIDTH = 64;
+const GAP = 8;
+
+const updateVisibleCount = () => {
+  if (!libraryContainerRef.value && !wishlistContainerRef.value) return;
+
+  const calc = (ref) => {
+    if (!ref.value) return 0;
+    return Math.floor(ref.value.clientWidth / (ITEM_WIDTH + GAP));
+  };
+
+  const count = Math.max(
+    calc(libraryContainerRef),
+    calc(wishlistContainerRef),
+    1,
+  );
+  visibleCount.value = count;
+};
+
+onMounted(() => {
+  resizeObserver.value = new ResizeObserver(() => updateVisibleCount());
+  if (libraryContainerRef.value)
+    resizeObserver.value.observe(libraryContainerRef.value);
+  if (wishlistContainerRef.value)
+    resizeObserver.value.observe(wishlistContainerRef.value);
+  updateVisibleCount();
+});
+
+onBeforeUnmount(() => {
+  resizeObserver.value?.disconnect();
+});
+
+watch([() => props.libraryBooks, () => props.wishlistBooks], () => {
+  updateVisibleCount();
+});
+
+const visibleLibraryBooks = computed(() =>
+  (props.libraryBooks || []).slice(0, visibleCount.value),
+);
+const visibleWishlistBooks = computed(() =>
+  (props.wishlistBooks || []).slice(0, visibleCount.value),
+);
 
 // Определяем тип подписки
 const subscriptionType = computed(() => {

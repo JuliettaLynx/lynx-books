@@ -31,7 +31,11 @@
     >
       У вас пока нет подписок. Используйте кнопку "+", чтобы найти друзей.
     </div>
-    <div v-else class="p-4 space-y-3">
+
+    <div
+      v-else
+      class="p-4 grid gap-3 grid-cols-1 min-[770px]:grid-cols-2 min-[1200px]:grid-cols-3"
+    >
       <SubscriptionCard
         v-for="sub in subscriptionsWithPreviews"
         :key="sub.userId"
@@ -41,6 +45,7 @@
         @unsubscribe="handleUnsubscribe"
         @open-library="openUserList(sub.userId, 'library')"
         @open-wishlist="openUserList(sub.userId, 'wishlist')"
+        @open-book="openBookModal"
       />
     </div>
 
@@ -58,12 +63,18 @@
       :user-name="externalUserInfo?.displayName"
       @close="externalViewOpen = false"
     />
+    <ReadonlyBookModal
+      :is-open="showBookModal"
+      :book="selectedBook"
+      :list-type="selectedListType"
+      @close="showBookModal = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { auth } from "../firebase/config";
 import { useCommunityStore } from "../stores/community";
@@ -75,12 +86,14 @@ import PrivacyModal from "../components/community/PrivacyModal.vue";
 import ShareModal from "../components/community/ShareModal.vue";
 import AddUserModal from "../components/community/AddUserModal.vue";
 import SubscriptionCard from "../components/community/SubscriptionCard.vue";
+import ReadonlyBookModal from "../components/community/ReadonlyBookModal.vue";
 import ExternalListView from "../components/community/ExternalListView.vue";
 
 const communityStore = useCommunityStore();
 const { subscriptions, loading, error } = storeToRefs(communityStore);
 const { loadSubscriptions, loadPrivacy, unsubscribe } = communityStore;
 const route = useRoute();
+const router = useRouter();
 
 const searchQuery = ref("");
 const privacyModalOpen = ref(false);
@@ -91,6 +104,16 @@ const externalUserId = ref("");
 const externalListType = ref("");
 const externalUserInfo = ref(null);
 const subscriptionPreviews = ref({});
+
+const selectedBook = ref(null);
+const showBookModal = ref(false);
+const selectedListType = ref("");
+
+const openBookModal = ({ book, listType }) => {
+  selectedBook.value = book;
+  selectedListType.value = listType;
+  showBookModal.value = true;
+};
 
 const filteredSubscriptions = computed(() => {
   if (!searchQuery.value) return subscriptions.value;
@@ -114,13 +137,13 @@ const loadPreviews = async () => {
     if (sub.hasLibraryAccess) {
       try {
         const books = await communityStore.fetchUserLibrary(sub.userId);
-        previews.libraryBooks = books.slice(0, 4);
+        previews.libraryBooks = books;
       } catch {}
     }
     if (sub.hasWishlistAccess) {
       try {
         const books = await communityStore.fetchUserWishlist(sub.userId);
-        previews.wishlistBooks = books.slice(0, 4);
+        previews.wishlistBooks = books;
       } catch {}
     }
     subscriptionPreviews.value[sub.userId] = previews;
@@ -140,6 +163,7 @@ const openUserList = (userId, listType) => {
   const sub = subscriptions.value.find((s) => s.userId === userId);
   externalUserInfo.value = sub ? { displayName: sub.displayName } : null;
   externalViewOpen.value = true;
+  window.history.pushState({ modal: true }, "");
 };
 
 const handleUnsubscribe = async (userId, listType = null) => {
@@ -147,10 +171,21 @@ const handleUnsubscribe = async (userId, listType = null) => {
   await refreshSubscriptions();
 };
 
+const handlePopState = () => {
+  if (externalViewOpen.value) {
+    externalViewOpen.value = false;
+  }
+};
+
 onMounted(() => {
   if (auth.currentUser) {
     refreshSubscriptions();
   }
   if (route.query.share) addModalOpen.value = true;
+  window.addEventListener("popstate", handlePopState);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("popstate", handlePopState);
 });
 </script>
