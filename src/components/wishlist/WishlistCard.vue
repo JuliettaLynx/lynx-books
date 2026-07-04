@@ -10,7 +10,7 @@
       :class="
         isGrid
           ? 'w-24 rounded-l-lg'
-          : 'h-72 rounded-t-lg max-[420px]:h-64 max-[390px]:h-60 max-[370px]:h-56 max-[360px]:h-52 max-[340px]:h-48 max-[310px]:h-44'
+          : 'h-64 rounded-t-lg max-[390px]:h-60 max-[370px]:h-56 max-[360px]:h-52 max-[340px]:h-48 max-[310px]:h-44'
       "
     >
       <div

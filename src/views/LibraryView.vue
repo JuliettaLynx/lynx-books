@@ -136,9 +136,9 @@
       <div
         v-else
         :class="{
-          'grid gap-3 grid-cols-2 min-[700px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6':
+          'grid gap-3 grid-cols-2 min-[700px]:grid-cols-3 min-[900px]:grid-cols-4 min-[1200px]:grid-cols-5 min-[1400px]:grid-cols-6 min-[1600px]:grid-cols-7 min-[1800px]:grid-cols-8 min-[2000px]:grid-cols-9 min-[2200px]:grid-cols-10 min-[2400px]:grid-cols-11 min-[2600px]:grid-cols-12 min-[2800px]:grid-cols-13 min-[3000px]:grid-cols-14':
             displayMode === 'grid',
-          'grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1300px]:grid-cols-4':
+          'grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1300px]:grid-cols-4 min-[1600px]:grid-cols-5 min-[1900px]:grid-cols-6 min-[2100px]:grid-cols-7 min-[2400px]:grid-cols-8':
             displayMode === 'list',
         }"
       >
