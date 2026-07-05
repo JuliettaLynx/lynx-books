@@ -331,7 +331,11 @@
             >
               <span v-if="!sectionLoading">Сохранить</span>
               <span v-else class="flex items-center justify-center">
-                <span class="animate-spin mr-2">⌛</span>
+                <img
+                  src="/public/loading.png"
+                  alt="Loading..."
+                  class="w-7 h-7 animate-spin"
+                />
                 Сохранение...
               </span>
             </button>
@@ -702,30 +706,27 @@ const saveSection = async () => {
   try {
     switch (activeSection.value) {
       case "profile": {
-        // Обновляем имя в Firebase Auth если изменилось
-        if (editDisplayName.value !== user.value?.displayName) {
-          await updateProfile(user.value, {
-            displayName: editDisplayName.value,
-          });
+        const updates = {};
+        const nameChanged = editDisplayName.value !== user.value?.displayName;
+
+        if (nameChanged) {
+          updates.displayName = editDisplayName.value;
+          await userStore.updateProfile(updates);
         }
 
         // Если аватар был изменен
         if (hasAvatarChanged.value) {
           if (avatarPreview.value) {
-            // Сохраняем новый аватар
             await userStore.updateAvatar(
               avatarPreview.value,
               originalAvatar.value,
             );
             userAvatar.value = avatarPreview.value;
           } else {
-            // Удаляем аватар
             await userStore.updateAvatar(null, null);
             userAvatar.value = null;
           }
-        } else if (editDisplayName.value !== user.value?.displayName) {
-          // Если изменилось только имя
-          await userStore.updateProfile({ displayName: editDisplayName.value });
+          hasAvatarChanged.value = false;
         }
 
         sectionSuccess.value = "Профиль обновлён";
@@ -758,10 +759,6 @@ const saveSection = async () => {
         passwordData.value = { current: "", new: "", confirm: "" };
         break;
     }
-
-    setTimeout(() => {
-      closeSection();
-    }, 1000);
   } catch (error) {
     console.error("Save error:", error);
     sectionError.value = error.message || "Произошла ошибка";
