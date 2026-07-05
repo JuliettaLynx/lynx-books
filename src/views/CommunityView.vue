@@ -34,7 +34,7 @@
 
     <div
       v-else
-      class="p-4 grid gap-3 grid-cols-1 min-[770px]:grid-cols-2 min-[1200px]:grid-cols-3"
+      class="p-4 grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1350px]:grid-cols-4 min-[1600px]:grid-cols-5 min-[2000px]:grid-cols-6 min-[2400px]:grid-cols-7 min-[3000px]:grid-cols-8"
     >
       <SubscriptionCard
         v-for="sub in subscriptionsWithPreviews"
@@ -42,6 +42,8 @@
         :subscription="sub"
         :libraryBooks="sub.libraryBooks"
         :wishlistBooks="sub.wishlistBooks"
+        :loading-library="sub.loadingLibrary"
+        :loading-wishlist="sub.loadingWishlist"
         @unsubscribe="handleUnsubscribe"
         @open-library="openUserList(sub.userId, 'library')"
         @open-wishlist="openUserList(sub.userId, 'wishlist')"
@@ -104,6 +106,7 @@ const externalUserId = ref("");
 const externalListType = ref("");
 const externalUserInfo = ref(null);
 const subscriptionPreviews = ref({});
+const loadingPreviews = ref({});
 
 const selectedBook = ref(null);
 const showBookModal = ref(false);
@@ -124,29 +127,51 @@ const filteredSubscriptions = computed(() => {
 });
 
 const subscriptionsWithPreviews = computed(() => {
-  return subscriptions.value.map((sub) => ({
-    ...sub,
-    libraryBooks: subscriptionPreviews.value[sub.userId]?.libraryBooks || [],
-    wishlistBooks: subscriptionPreviews.value[sub.userId]?.wishlistBooks || [],
-  }));
+  return subscriptions.value.map((sub) => {
+    const lp = loadingPreviews.value[sub.userId];
+    return {
+      ...sub,
+      libraryBooks: subscriptionPreviews.value[sub.userId]?.libraryBooks || [],
+      wishlistBooks:
+        subscriptionPreviews.value[sub.userId]?.wishlistBooks || [],
+      loadingLibrary: lp?.library ?? true,
+      loadingWishlist: lp?.wishlist ?? true,
+    };
+  });
 });
 
 const loadPreviews = async () => {
   for (const sub of subscriptions.value) {
-    const previews = {};
+    const userId = sub.userId;
+    loadingPreviews.value[userId] = { library: true, wishlist: true };
+    subscriptionPreviews.value[userId] = {
+      libraryBooks: [],
+      wishlistBooks: [],
+    };
+  }
+
+  for (const sub of subscriptions.value) {
+    const userId = sub.userId;
+
     if (sub.hasLibraryAccess) {
       try {
-        const books = await communityStore.fetchUserLibrary(sub.userId);
-        previews.libraryBooks = books;
+        const books = await communityStore.fetchUserLibrary(userId);
+        subscriptionPreviews.value[userId].libraryBooks = books;
       } catch {}
+    } else {
+      subscriptionPreviews.value[userId].libraryBooks = [];
     }
+    loadingPreviews.value[userId].library = false;
+
     if (sub.hasWishlistAccess) {
       try {
-        const books = await communityStore.fetchUserWishlist(sub.userId);
-        previews.wishlistBooks = books;
+        const books = await communityStore.fetchUserWishlist(userId);
+        subscriptionPreviews.value[userId].wishlistBooks = books;
       } catch {}
+    } else {
+      subscriptionPreviews.value[userId].wishlistBooks = [];
     }
-    subscriptionPreviews.value[sub.userId] = previews;
+    loadingPreviews.value[userId].wishlist = false;
   }
 };
 

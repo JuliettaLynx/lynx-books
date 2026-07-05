@@ -23,89 +23,116 @@
     <div class="grid grid-cols-1 gap-4">
       <!-- Карточка библиотеки -->
       <div
-        v-if="subscription.hasLibraryAccess"
+        v-if="subscription?.hasLibraryAccess"
         class="border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-library')"
       >
-        <div class="font-medium mb-2 flex justify-between items-center">
+        <div class="font-medium flex justify-between items-center">
           <span>📚 Библиотека</span>
         </div>
-        <div ref="libraryContainerRef" class="flex gap-2 py-2 px-2">
+        <div ref="libraryContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
           <div
-            v-for="book in visibleLibraryBooks"
-            :key="book.id"
-            class="w-16 flex-shrink-0 relative group"
-            @click.stop="$emit('open-book', { book, listType: 'library' })"
+            v-if="loadingLibrary"
+            class="flex justify-center items-center w-full py-4"
           >
             <img
-              :src="book.cover || defaultCover"
-              class="w-full aspect-[2/3] object-cover rounded transition-transform duration-200"
+              src="/public/loading.png"
+              alt="Loading..."
+              class="w-7 h-7 animate-spin"
             />
-
+          </div>
+          <template v-else>
             <div
-              class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+              v-for="book in visibleLibraryBooks"
+              :key="book.id"
+              class="w-16 flex-shrink-0 relative group"
+              @click.stop="$emit('open-book', { book, listType: 'library' })"
             >
-              <div class="text-center text-white">
-                <div class="break-words w-16 text-[11px] tracking-[-0.04em]">
-                  {{ book.title }}
-                </div>
-                <div
-                  v-if="book.author"
-                  class="break-words w-16 text-[10px] opacity-80 font-thin"
-                >
-                  {{ book.author }}
+              <img
+                :src="book.cover || defaultCover"
+                class="w-full aspect-[2/3] object-cover rounded transition-transform duration-200"
+              />
+
+              <div
+                class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+              >
+                <div class="text-center text-white">
+                  <div class="break-words w-16 text-[11px] tracking-[-0.04em]">
+                    {{ book.title }}
+                  </div>
+                  <div
+                    v-if="book.author"
+                    class="break-words w-16 text-[10px] opacity-80 font-thin"
+                  >
+                    {{ book.author }}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div v-if="libraryBooks.length === 0" class="text-sm text-gray-500">
-            Нет книг
-          </div>
+            <div v-if="libraryBooks.length === 0" class="text-sm text-gray-500">
+              Нет книг
+            </div>
+          </template>
         </div>
       </div>
 
       <!-- Карточка вишлиста -->
       <div
-        v-if="subscription.hasWishlistAccess"
+        v-if="subscription?.hasWishlistAccess"
         class="border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-wishlist')"
       >
-        <div class="font-medium mb-2 flex justify-between items-center">
+        <div class="font-medium flex justify-between items-center">
           <span>⭐ Вишлист</span>
         </div>
-        <div ref="wishlistContainerRef" class="flex gap-2 py-2 px-2">
+        <div ref="wishlistContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
           <div
-            v-for="book in visibleWishlistBooks"
-            :key="book.id"
-            class="w-16 flex-shrink-0 relative group"
-            @click.stop="$emit('open-book', { book, listType: 'wishlist' })"
+            v-if="loadingWishlist"
+            class="flex justify-center items-center w-full py-4"
           >
             <img
-              :src="book.cover || defaultCover"
-              class="w-full aspect-[2/3] object-cover rounded transition-transform duration-200"
+              src="/public/loading.png"
+              alt="Loading..."
+              class="w-7 h-7 animate-spin"
             />
-
+          </div>
+          <template v-else>
             <div
-              class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+              v-for="book in visibleWishlistBooks"
+              :key="book.id"
+              class="w-16 flex-shrink-0 relative group"
+              @click.stop="$emit('open-book', { book, listType: 'wishlist' })"
             >
+              <img
+                :src="book.cover || defaultCover"
+                class="w-full aspect-[2/3] object-cover rounded transition-transform duration-200"
+              />
+
               <div
-                class="text-center text-white text-[11px] tracking-[-0.04em]"
+                class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
               >
-                <div class="break-words w-16">
-                  {{ book.title }}
-                </div>
                 <div
-                  v-if="book.author"
-                  class="break-words w-16 text-[10px] opacity-80"
+                  class="text-center text-white text-[11px] tracking-[-0.04em]"
                 >
-                  {{ book.author }}
+                  <div class="break-words w-16">
+                    {{ book.title }}
+                  </div>
+                  <div
+                    v-if="book.author"
+                    class="break-words w-16 text-[10px] opacity-80"
+                  >
+                    {{ book.author }}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div v-if="wishlistBooks.length === 0" class="text-sm text-gray-500">
-            Нет книг
-          </div>
+            <div
+              v-if="wishlistBooks.length === 0"
+              class="text-sm text-gray-500"
+            >
+              Нет книг
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -131,6 +158,8 @@ const props = defineProps({
   subscription: Object,
   libraryBooks: Array,
   wishlistBooks: Array,
+  loadingLibrary: Boolean,
+  loadingWishlist: Boolean,
 });
 const emit = defineEmits([
   "open-library",
