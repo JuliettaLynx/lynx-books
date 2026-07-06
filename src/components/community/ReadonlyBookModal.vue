@@ -26,17 +26,23 @@
         </div>
 
         <div class="flex-1 overflow-y-auto p-4">
-          <!-- Две колонки: обложка и основные поля -->
-          <div class="flex gap-4 mt-4">
+          <div class="flex gap-4">
             <!-- Левая колонка: обложка -->
-            <div class="flex-shrink-0 w-28">
-              <img
-                :src="book?.cover || defaultCover"
-                class="w-full aspect-[2/3] object-cover rounded-lg border border-border dark:border-border-dark"
-                alt="Обложка"
-              />
+            <div class="relative h-full">
+              <div
+                v-if="book?.priority && book.priority > 0"
+                class="absolute right-1 top-1 z-10 bg-accent/50 text-white dark:text-black rounded-lg w-6 h-6 flex items-center justify-center text-xs font-bold"
+              >
+                {{ book.priority }}
+              </div>
+              <div class="flex-shrink-0 w-28">
+                <img
+                  :src="book?.cover || defaultCover"
+                  class="w-full aspect-[2/3] object-cover rounded-lg border border-border dark:border-border-dark"
+                  alt="Обложка"
+                />
+              </div>
             </div>
-
             <!-- Правая колонка: название, автор, издательство -->
             <div class="flex-1 space-y-4">
               <div>
@@ -116,13 +122,6 @@
                 >
                 <p class="text-gray-900 dark:text-white">{{ book.binding }}</p>
               </div>
-              <div v-if="book?.priority && book.priority > 0">
-                <label
-                  class="block text-sm font-medium text-gray-500 dark:text-gray-400"
-                  >Приоритет</label
-                >
-                <p class="text-gray-900 dark:text-white">{{ book.priority }}</p>
-              </div>
               <div v-if="book?.note">
                 <label
                   class="block text-sm font-medium text-gray-500 dark:text-gray-400"
@@ -134,28 +133,16 @@
               </div>
             </template>
 
-            <!-- Общее описание -->
             <div v-if="book?.description">
               <label
                 class="block text-sm font-medium text-gray-500 dark:text-gray-400"
-                >Аннотация / Описание</label
+                >Аннотация</label
               >
               <p class="text-gray-900 dark:text-white whitespace-pre-wrap">
                 {{ book.description }}
               </p>
             </div>
           </div>
-        </div>
-
-        <div
-          class="flex-shrink-0 border-t border-border dark:border-border-dark p-4"
-        >
-          <button
-            @click="close"
-            class="w-full py-2 px-4 bg-accent/60 hover:bg-accent/80 text-white rounded-lg transition-colors"
-          >
-            Закрыть
-          </button>
         </div>
       </div>
     </div>

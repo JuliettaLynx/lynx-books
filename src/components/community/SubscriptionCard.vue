@@ -24,13 +24,13 @@
       <!-- Карточка библиотеки -->
       <div
         v-if="subscription?.hasLibraryAccess"
-        class="border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+        class="ml-12 md:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-library')"
       >
         <div class="font-medium flex justify-between items-center">
           <span>📚 Библиотека</span>
         </div>
-        <div ref="libraryContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
+        <div ref="libraryContainerRef" class="hidden md:flex gap-2 py-2 px-2">
           <div
             v-if="loadingLibrary"
             class="flex justify-center items-center w-full py-4"
@@ -79,13 +79,13 @@
       <!-- Карточка вишлиста -->
       <div
         v-if="subscription?.hasWishlistAccess"
-        class="border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+        class="ml-12 md:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-wishlist')"
       >
         <div class="font-medium flex justify-between items-center">
           <span>⭐ Вишлист</span>
         </div>
-        <div ref="wishlistContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
+        <div ref="wishlistContainerRef" class="hidden md:flex gap-2 py-2 px-2">
           <div
             v-if="loadingWishlist"
             class="flex justify-center items-center w-full py-4"

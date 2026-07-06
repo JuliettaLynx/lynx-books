@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="isOpen"
-      class="fixed pb-14 inset-0 bg-black bg-opacity-90 z-40 overflow-auto"
+      class="fixed pb-14 lg:pb-0 inset-0 bg-black bg-opacity-90 z-40 overflow-auto"
     >
       <div class="relative w-full">
         <!-- Шапка с заголовком и кнопкой закрытия -->
