@@ -11,7 +11,6 @@
           <h1 class="text-2xl tracking-wider font-bold dark:text-white">
             {{ isLoginMode ? "Вход" : "Регистрация" }}
           </h1>
-          <ThemeToggle />
         </div>
       </div>
 
@@ -160,7 +159,6 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "../firebase/config";
-import ThemeToggle from "../components/ThemeToggle.vue";
 import { useUserStore } from "../stores/user";
 
 const router = useRouter();

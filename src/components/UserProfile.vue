@@ -78,7 +78,7 @@
         </div>
       </div>
 
-      <!-- Настройки темы -->
+      <!-- Настройки темы
       <div class="p-2">
         <div class="px-2 py-1 grid grid-cols-6 gap-4">
           <p class="col-span-3">Тема:</p>
@@ -119,6 +119,7 @@
           </button>
         </div>
       </div>
+      -->
 
       <!-- Настройки режима отображения -->
       <div class="p-2 border-b border-border dark:border-border-dark">
@@ -478,9 +479,9 @@ const user = computed(() => auth.currentUser);
 const colorMode = useColorMode({
   emitAuto: true,
   modes: {
-    light: "light",
+    light: "dark",
     dark: "dark",
-    auto: "auto",
+    auto: "dark",
   },
 });
 

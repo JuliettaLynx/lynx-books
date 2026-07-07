@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+    class="dark min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
     :class="{ 'pb-14 lg:pb-0': !isSidebarOpen }"
   >
     <LoadingSpinner v-if="!authReady" />
