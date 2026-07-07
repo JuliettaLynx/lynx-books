@@ -63,6 +63,6 @@ const pageTitle = computed(() => {
     "/wishlist": "Вишлист",
     "/community": "Сообщество",
   };
-  return titles[route.path] || "Приложение";
+  return titles[route.path] || "";
 });
 </script>
