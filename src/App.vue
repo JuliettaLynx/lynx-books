@@ -1,26 +1,12 @@
 <template>
   <div
-    class="dark min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
-    :class="{ 'pb-14 lg:pb-0': !isSidebarOpen }"
+    class="dark pl-0 lg:pl-16 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
   >
     <LoadingSpinner v-if="!authReady" />
     <template v-else>
-      <!-- Overlay для sidebar -->
-      <div
-        v-if="isSidebarOpen"
-        class="fixed inset-0 z-50 hidden lg:block"
-        @click="isSidebarOpen = false"
-      ></div>
+      <Sidebar class="hidden lg:flex" />
 
-      <!-- Sidebar -->
-      <Sidebar :is-open="isSidebarOpen" @close="isSidebarOpen = false" />
-
-      <!-- Header с бургером -->
-      <Header
-        v-if="user"
-        :is-sidebar-open="isSidebarOpen"
-        @toggle-menu="isSidebarOpen = !isSidebarOpen"
-      />
+      <Header v-if="user" />
 
       <!-- Контент -->
       <div class="transition-all duration-300">

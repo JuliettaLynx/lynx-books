@@ -2,15 +2,14 @@
   <Teleport to="body">
     <div
       v-if="isOpen"
-      class="fixed pb-14 lg:pb-0 inset-0 bg-black bg-opacity-90 z-40 overflow-auto"
+      class="fixed pb-14 pl-0 lg:pl-16 inset-0 bg-white dark:bg-bg-primary-dark z-40 overflow-auto"
     >
       <div class="relative w-full">
-        <!-- Шапка с заголовком и кнопкой закрытия -->
         <div
-          class="sticky px-3 top-0 z-20 bg-white dark:bg-bg-primary-dark text-black dark:text-white pb-3 mb-4"
+          class="px-3 pb-3 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark text-black dark:text-white"
         >
           <h2
-            class="text-xl relative top-3.5 mb-2.5 flex justify-center tracking-wider font-bold dark:text-white"
+            class="px-2 pr-6 text-xl relative top-3 mb-4 tracking-wider font-bold dark:text-white line-clamp-2"
           >
             {{ isLibrary ? "Библиотека" : "Вишлист" }}
             {{ userName || userId }}
@@ -22,12 +21,15 @@
             @click="close"
             class="absolute right-4 top-2 text-xl dark:text-white"
           />
+        </div>
 
-          <div class="flex pt-3 justify-between items-center">
+        <div
+          class="sticky top-0 pl-4 p-1.5 mb-3 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark text-black dark:text-white shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)] transition-colors duration-200"
+        >
+          <div class="flex justify-between items-center">
             <SearchInput
               v-model="searchQuery"
               placeholder="Название или автор"
-              class="mt-3 pl-1"
             />
 
             <!-- Overlay -->

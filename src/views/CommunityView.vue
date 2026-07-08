@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { auth } from "../firebase/config";
@@ -202,15 +202,27 @@ const handlePopState = () => {
   }
 };
 
+watch(route, () => {
+  if (externalViewOpen.value) {
+    externalViewOpen.value = false;
+  }
+});
+
+const handleCloseExternalView = () => {
+  externalViewOpen.value = false;
+};
+
 onMounted(() => {
   if (auth.currentUser) {
     refreshSubscriptions();
   }
   if (route.query.share) addModalOpen.value = true;
   window.addEventListener("popstate", handlePopState);
+  window.addEventListener("close-external-view", handleCloseExternalView);
 });
 
 onUnmounted(() => {
   window.removeEventListener("popstate", handlePopState);
+  window.removeEventListener("close-external-view", handleCloseExternalView);
 });
 </script>
