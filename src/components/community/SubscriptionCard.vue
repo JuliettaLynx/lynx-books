@@ -24,7 +24,7 @@
       <!-- Карточка библиотеки -->
       <div
         v-if="subscription?.hasLibraryAccess"
-        class="ml-12 min-[700px]:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+        class="ml-12 lg:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-library')"
       >
         <div class="font-medium flex justify-between items-center">
@@ -76,10 +76,23 @@
         </div>
       </div>
 
+      <!-- Карточка отсутствия доступа к библиотеке -->
+      <div
+        v-else
+        class="ml-12 min-[700px]:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+      >
+        <div class="font-medium flex justify-between items-center">
+          <span>❌ Библиотека</span>
+        </div>
+        <div class="hidden lg:flex py-2 px-2">
+          <div class="text-sm text-gray-500">Нет доступа</div>
+        </div>
+      </div>
+
       <!-- Карточка вишлиста -->
       <div
         v-if="subscription?.hasWishlistAccess"
-        class="ml-12 min-[700px]:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+        class="ml-12 lg:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-wishlist')"
       >
         <div class="font-medium flex justify-between items-center">
@@ -133,6 +146,19 @@
               Нет книг
             </div>
           </template>
+        </div>
+      </div>
+
+      <!-- Карточка отсутствия доступа к вишлисту -->
+      <div
+        v-else
+        class="ml-12 lg:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+      >
+        <div class="font-medium flex justify-between items-center">
+          <span>❌ Вишлист</span>
+        </div>
+        <div class="hidden lg:flex py-2 px-2">
+          <div class="text-sm text-gray-500">Нет доступа</div>
         </div>
       </div>
     </div>

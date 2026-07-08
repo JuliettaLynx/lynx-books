@@ -37,7 +37,7 @@
       class="p-4 grid gap-3 grid-cols-1 min-[500px]:grid-cols-2 min-[1070px]:grid-cols-3 min-[1400px]:grid-cols-4 min-[1600px]:grid-cols-5 min-[2000px]:grid-cols-6 min-[2400px]:grid-cols-7 min-[3000px]:grid-cols-8"
     >
       <SubscriptionCard
-        v-for="sub in subscriptionsWithPreviews"
+        v-for="sub in filteredSubscriptions"
         :key="sub.userId"
         :subscription="sub"
         :libraryBooks="sub.libraryBooks"
@@ -119,10 +119,10 @@ const openBookModal = ({ book, listType }) => {
 };
 
 const filteredSubscriptions = computed(() => {
-  if (!searchQuery.value) return subscriptions.value;
+  if (!searchQuery.value) return subscriptionsWithPreviews.value;
   const q = searchQuery.value.toLowerCase();
-  return subscriptions.value.filter((s) =>
-    s.displayName.toLowerCase().includes(q),
+  return subscriptionsWithPreviews.value.filter((s) =>
+    s.displayName?.toLowerCase().includes(q),
   );
 });
 
