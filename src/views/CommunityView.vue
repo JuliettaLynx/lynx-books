@@ -34,7 +34,7 @@
 
     <div
       v-else
-      class="p-4 grid gap-3 grid-cols-1 min-[700px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1350px]:grid-cols-4 min-[1600px]:grid-cols-5 min-[2000px]:grid-cols-6 min-[2400px]:grid-cols-7 min-[3000px]:grid-cols-8"
+      class="p-4 grid gap-3 grid-cols-1 min-[500px]:grid-cols-2 min-[1070px]:grid-cols-3 min-[1400px]:grid-cols-4 min-[1600px]:grid-cols-5 min-[2000px]:grid-cols-6 min-[2400px]:grid-cols-7 min-[3000px]:grid-cols-8"
     >
       <SubscriptionCard
         v-for="sub in subscriptionsWithPreviews"
@@ -211,6 +211,10 @@ watch(route, () => {
 const handleCloseExternalView = () => {
   externalViewOpen.value = false;
 };
+
+watch(externalViewOpen, (isOpen) => {
+  document.body.style.overflow = isOpen ? "hidden" : "";
+});
 
 onMounted(() => {
   if (auth.currentUser) {

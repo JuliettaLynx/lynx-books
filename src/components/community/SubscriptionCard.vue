@@ -2,35 +2,35 @@
   <div
     class="border border-border dark:border-border-dark rounded-lg p-4 bg-white dark:bg-bg-secondary-dark"
   >
-    <div class="flex justify-between items-center mb-4">
-      <div class="flex items-center gap-3">
+    <div class="flex justify-between items-center mb-2">
+      <div class="flex min-w-0 items-center gap-3">
         <img
           :src="subscription.avatar || defaultAvatar"
           class="w-10 h-10 rounded-full object-cover"
         />
-        <span class="font-bold dark:text-white text-lg">{{
+        <span class="font-bold dark:text-white text-lg inline-block truncate">{{
           subscription.displayName
         }}</span>
       </div>
       <button
         @click="confirmUnsubscribe"
-        class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
+        class="px-1.5 py-1 ml-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
       >
-        Отписаться
+        🗑
       </button>
     </div>
 
-    <div class="grid grid-cols-1 gap-4">
+    <div class="grid grid-cols-1 gap-3">
       <!-- Карточка библиотеки -->
       <div
         v-if="subscription?.hasLibraryAccess"
-        class="ml-12 md:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+        class="ml-12 min-[700px]:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-library')"
       >
         <div class="font-medium flex justify-between items-center">
           <span>📚 Библиотека</span>
         </div>
-        <div ref="libraryContainerRef" class="hidden md:flex gap-2 py-2 px-2">
+        <div ref="libraryContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
           <div
             v-if="loadingLibrary"
             class="flex justify-center items-center w-full py-4"
@@ -45,7 +45,7 @@
             <div
               v-for="book in visibleLibraryBooks"
               :key="book.id"
-              class="w-16 flex-shrink-0 relative group"
+              class="w-14 flex-shrink-0 relative group"
               @click.stop="$emit('open-book', { book, listType: 'library' })"
             >
               <img
@@ -57,12 +57,12 @@
                 class="absolute inset-0 bg-black/70 rounded flex items-center justify-center p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
               >
                 <div class="text-center text-white">
-                  <div class="break-words w-16 text-[11px] tracking-[-0.04em]">
+                  <div class="break-words w-14 text-[11px] tracking-[-0.04em]">
                     {{ book.title }}
                   </div>
                   <div
                     v-if="book.author"
-                    class="break-words w-16 text-[10px] opacity-80 font-thin"
+                    class="break-words w-14 text-[10px] opacity-80 font-thin"
                   >
                     {{ book.author }}
                   </div>
@@ -79,13 +79,13 @@
       <!-- Карточка вишлиста -->
       <div
         v-if="subscription?.hasWishlistAccess"
-        class="ml-12 md:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
+        class="ml-12 min-[700px]:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-wishlist')"
       >
         <div class="font-medium flex justify-between items-center">
           <span>⭐ Вишлист</span>
         </div>
-        <div ref="wishlistContainerRef" class="hidden md:flex gap-2 py-2 px-2">
+        <div ref="wishlistContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
           <div
             v-if="loadingWishlist"
             class="flex justify-center items-center w-full py-4"
@@ -100,7 +100,7 @@
             <div
               v-for="book in visibleWishlistBooks"
               :key="book.id"
-              class="w-16 flex-shrink-0 relative group"
+              class="w-14 flex-shrink-0 relative group"
               @click.stop="$emit('open-book', { book, listType: 'wishlist' })"
             >
               <img
@@ -114,12 +114,12 @@
                 <div
                   class="text-center text-white text-[11px] tracking-[-0.04em]"
                 >
-                  <div class="break-words w-16">
+                  <div class="break-words w-14">
                     {{ book.title }}
                   </div>
                   <div
                     v-if="book.author"
-                    class="break-words w-16 text-[10px] opacity-80"
+                    class="break-words w-14 text-[10px] opacity-80"
                   >
                     {{ book.author }}
                   </div>
@@ -178,7 +178,7 @@ const wishlistContainerRef = ref(null);
 const visibleCount = ref(10);
 const resizeObserver = ref(null);
 
-const ITEM_WIDTH = 64;
+const ITEM_WIDTH = 56;
 const GAP = 8;
 
 const updateVisibleCount = () => {
