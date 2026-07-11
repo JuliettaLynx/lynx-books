@@ -1,8 +1,8 @@
 <template>
   <div
-    class="dark pl-0 lg:pl-16 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+    class="dark pl-0 lg:pl-16 pb-16 lg:pb-0 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
   >
-    <LoadingSpinner v-if="!authReady" />
+    <LoadingSpinner v-if="!authReady" fullscreen />
     <template v-else>
       <Sidebar class="hidden lg:flex" />
 

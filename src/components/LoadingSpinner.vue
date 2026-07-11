@@ -1,7 +1,9 @@
 <template>
   <div
     class="flex flex-col items-center justify-center pt-5"
-    :class="{ 'fixed inset-0 bg-gray-50 dark:bg-gray-900 z-50': fullscreen }"
+    :class="{
+      'fixed inset-0 bg-white dark:bg-bg-primary-dark z-50': fullscreen,
+    }"
   >
     <div class="text-center">
       <img
