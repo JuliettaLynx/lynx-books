@@ -70,9 +70,14 @@
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-black dark:text-white"
               >
-                <span class="text-lg">{{ showPassword ? "👁️" : "👁️‍🗨️" }}</span>
+                <div v-if="showPassword">
+                  <OpenIcon class="w-6 h-6" />
+                </div>
+                <div v-else>
+                  <CloseIcon class="w-6 h-6" />
+                </div>
               </button>
             </div>
           </div>
@@ -160,6 +165,9 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { useUserStore } from "../stores/user";
+
+import OpenIcon from "../assets/icons/auth/open.svg?component";
+import CloseIcon from "../assets/icons/auth/close.svg?component";
 
 const router = useRouter();
 
