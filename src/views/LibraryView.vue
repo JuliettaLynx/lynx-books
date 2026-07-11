@@ -23,13 +23,18 @@
         ></div>
 
         <!-- Кнопка сортировки -->
-        <div class="relative px-2" ref="sortMenuRef">
-          <IconButton
-            icon="🔽"
-            :variant="'primary'"
-            @click="toggleSortMenu"
-            class="text-xl"
-          />
+        <div class="relative pl-2 pr-1" ref="sortMenuRef">
+          <div class="text-border-dark/40 dark:text-border/40">
+            <button
+              @click="toggleSortMenu"
+              class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+              :class="{
+                'text-accent': currentSort,
+              }"
+            >
+              <SortingIcon class="w-6 h-6" />
+            </button>
+          </div>
           <div
             v-if="sortMenuOpen"
             class="absolute right-0 mt-3 w-56 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
@@ -71,12 +76,17 @@
 
         <!-- Кнопка фильтра -->
         <div class="relative pr-2" ref="filterMenuRef">
-          <IconButton
-            :icon="filterIcon"
-            :variant="'primary'"
-            @click="toggleFilterMenu"
-            class="text-xl"
-          />
+          <div class="text-border-dark/40 dark:text-border/40">
+            <button
+              @click="toggleFilterMenu"
+              class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+              :class="{
+                'text-accent': currentFilter !== 'all',
+              }"
+            >
+              <FilterIcon class="w-6 h-6" />
+            </button>
+          </div>
           <div
             v-if="filterMenuOpen"
             class="absolute right-0 mt-3 w-48 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
@@ -86,12 +96,13 @@
                 v-for="option in filterOptions"
                 :key="option.value"
                 @click="setFilter(option.value)"
-                class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                class="w-full flex gap-2 text-left pl-2 p-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
                 :class="{
                   'bg-purple-200 dark:bg-accent/30':
                     currentFilter === option.value,
                 }"
               >
+                <component :is="option.icon" class="w-5 h-5 text-red-600" />
                 {{ option.label }}
               </button>
             </div>
@@ -99,13 +110,12 @@
         </div>
       </div>
 
-      <!-- Кнопка добавления -->
-      <IconButton
-        icon="+"
-        variant="primary"
-        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+      <button
         @click="openModal"
-      />
+        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-lg bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-bg-primary-dark shadow-lg transition-colors duration-200"
+      >
+        <PlusIcon class="w-5 h-5" />
+      </button>
     </div>
 
     <div v-if="libraryStore.error" class="p-4 text-center">
@@ -190,6 +200,16 @@ import BookCard from "../components/library/BookCard.vue";
 import BookModal from "../components/library/BookModal.vue";
 import DeleteModal from "../components/DeleteModal.vue";
 
+import FilterIcon from "../assets/icons/filter.svg?component";
+import SortingIcon from "../assets/icons/sorting.svg?component";
+import PlusIcon from "../assets/icons/plus.svg?component";
+
+import AllBooksIcon from "../assets/icons/allbooks.svg?component";
+import FavoriteIcon from "../assets/icons/favorite.svg?component";
+import FinishedIcon from "../assets/icons/finished.svg?component";
+import UnfinishedIcon from "../assets/icons/unfinished.svg?component";
+import AbandonedIcon from "../assets/icons/abandoned.svg?component";
+
 const libraryStore = useLibraryStore();
 const displaySettings = useDisplaySettingsStore();
 const displayMode = computed(() => displaySettings.displayMode);
@@ -243,23 +263,12 @@ onMounted(() => {
 
 // Опции фильтра
 const filterOptions = [
-  { value: "all", label: "📚 Все" },
-  { value: "favorite", label: "❤️ Избранные" },
-  { value: "finished", label: "✅ Прочитано" },
-  { value: "unfinished", label: "📖 Не прочитано" },
-  { value: "abandoned", label: "❌ Брошено" },
+  { value: "all", label: "Все", icon: AllBooksIcon },
+  { value: "favorite", label: "Избранные", icon: FavoriteIcon },
+  { value: "finished", label: "Прочитано", icon: FinishedIcon },
+  { value: "unfinished", label: "Не прочитано", icon: UnfinishedIcon },
+  { value: "abandoned", label: "Брошено", icon: AbandonedIcon },
 ];
-
-// Иконка для кнопки фильтра
-const filterIcon = computed(() => {
-  const map = {
-    favorite: "❤️",
-    finished: "✅",
-    unfinished: "📖",
-    abandoned: "❌",
-  };
-  return map[currentFilter.value] || "📚";
-});
 
 // Методы управления модалкой
 const openModal = () => {
@@ -296,21 +305,6 @@ const setSort = (value) => {
 const setFilter = (value) => {
   currentFilter.value = value;
   filterMenuOpen.value = false;
-};
-
-// Переключение режима отображения
-const toggleViewMode = () => {
-  viewMode.value = viewMode.value === "grid" ? "tile" : "grid";
-};
-
-// Циклическое переключение сортировки
-const cycleSortMode = () => {
-  sortMode.value = (sortMode.value + 1) % 4;
-};
-
-// Циклическое переключение фильтра
-const cycleFilterMode = () => {
-  filterMode.value = (filterMode.value + 1) % 5;
 };
 
 // Debounce для поиска
