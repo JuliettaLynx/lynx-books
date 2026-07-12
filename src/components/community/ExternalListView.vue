@@ -45,15 +45,19 @@
             ></div>
 
             <!-- Кнопки сортировки / фильтра -->
-            <div class="relative px-2">
-              <span ref="sortButtonRef">
-                <IconButton
-                  icon="🔽"
-                  variant="primary"
+            <div class="relative px-2" ref="sortButtonRef">
+              <div class="text-border-dark/40 dark:text-border/40">
+                <button
                   @click="toggleSortMenu"
-                  class="text-xl"
-                />
-              </span>
+                  class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+                  :class="{
+                    'text-accent': currentSort,
+                  }"
+                >
+                  <SortingIcon class="w-6 h-6" />
+                </button>
+              </div>
+
               <div
                 v-if="sortMenuOpen"
                 ref="sortMenuRef"
@@ -96,15 +100,18 @@
               </div>
             </div>
 
-            <div class="relative pr-2" v-if="isLibrary">
-              <span ref="filterButtonRef">
-                <IconButton
-                  :icon="filterIcon"
-                  variant="primary"
+            <div class="relative pr-2" v-if="isLibrary" ref="filterButtonRef">
+              <div class="text-border-dark/40 dark:text-border/40">
+                <button
                   @click="toggleFilterMenu"
-                  class="text-xl"
-                />
-              </span>
+                  class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+                  :class="{
+                    'text-accent': currentFilter !== 'all',
+                  }"
+                >
+                  <FilterIcon class="w-6 h-6" />
+                </button>
+              </div>
               <div
                 v-if="filterMenuOpen"
                 ref="filterMenuRef"
@@ -186,6 +193,9 @@ import SearchInput from "../library/SearchInput.vue";
 import LoadingSpinner from "../LoadingSpinner.vue";
 import ReadonlyBookModal from "./ReadonlyBookModal.vue";
 import ReadonlyBookCard from "./ReadonlyBookCard.vue";
+
+import FilterIcon from "../../assets/icons/filter.svg?component";
+import SortingIcon from "../../assets/icons/sorting.svg?component";
 
 const props = defineProps({
   isOpen: Boolean,
