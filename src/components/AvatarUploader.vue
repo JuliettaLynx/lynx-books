@@ -21,10 +21,10 @@
       <button
         v-if="avatarPreview"
         type="button"
-        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors"
+        class="absolute -top-2 -right-2 w-6 h-6 text-red-500 rounded-full flex items-center justify-center text-sm hover:text-red-600 transition-colors"
         @click.stop="handleRemove"
       >
-        ✕
+        <CrossIcon class="w-6 h-6" />
       </button>
     </div>
 
@@ -107,6 +107,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { usersDB } from ".././db/index";
+import CrossIcon from "../assets/icons/cross.svg?component";
 
 // Пропсы и эмиты
 const props = defineProps({
