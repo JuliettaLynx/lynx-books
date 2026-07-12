@@ -204,11 +204,11 @@ import FilterIcon from "../assets/icons/filter.svg?component";
 import SortingIcon from "../assets/icons/sorting.svg?component";
 import PlusIcon from "../assets/icons/plus.svg?component";
 
-import AllBooksIcon from "../assets/icons/allbooks.svg?component";
-import FavoriteIcon from "../assets/icons/favorite.svg?component";
-import FinishedIcon from "../assets/icons/finished.svg?component";
-import UnfinishedIcon from "../assets/icons/unfinished.svg?component";
-import AbandonedIcon from "../assets/icons/abandoned.svg?component";
+import AllBooksIcon from "../assets/icons/bookcard/allbooks.svg?component";
+import FavoriteIcon from "../assets/icons/bookcard/favorite.svg?component";
+import FinishedIcon from "../assets/icons/bookcard/finished.svg?component";
+import UnfinishedIcon from "../assets/icons/bookcard/unfinished.svg?component";
+import AbandonedIcon from "../assets/icons/bookcard/abandoned.svg?component";
 
 const libraryStore = useLibraryStore();
 const displaySettings = useDisplaySettingsStore();
