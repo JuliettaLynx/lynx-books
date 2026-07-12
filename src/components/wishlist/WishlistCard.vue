@@ -25,7 +25,9 @@
         class="h-full relative z-0 flex items-center justify-center text-4xl"
       >
         <img v-if="book.cover" :src="book.cover" class="h-full" alt="Обложка" />
-        <span v-else>📷</span>
+        <span v-else>
+          <CameraIcon class="w-14 h-14 text-border-dark/40 dark:text-border/40"
+        /></span>
       </div>
     </div>
 
@@ -70,6 +72,7 @@
 <script setup>
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import CameraIcon from "../../assets/icons/bookcard/camera.svg?component";
 
 const props = defineProps({
   book: {

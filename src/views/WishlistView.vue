@@ -18,12 +18,17 @@
 
         <!-- Сортировка -->
         <div class="relative px-2" ref="sortMenuRef">
-          <IconButton
-            icon="🔽"
-            variant="primary"
-            @click="toggleSortMenu"
-            class="text-xl"
-          />
+          <div class="text-border-dark/40 dark:text-border/40">
+            <button
+              @click="toggleSortMenu"
+              class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+              :class="{
+                'text-accent': currentSort,
+              }"
+            >
+              <SortingIcon class="w-6 h-6" />
+            </button>
+          </div>
           <div
             v-if="sortMenuOpen"
             class="absolute right-0 w-56 mt-3 bg-white dark:bg-bg-secondary-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-30"
@@ -64,12 +69,12 @@
         </div>
       </div>
 
-      <IconButton
-        icon="+"
-        variant="primary"
-        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-black shadow-lg transition-colors duration-200"
+      <button
         @click="openAddModal"
-      />
+        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-lg bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-bg-primary-dark shadow-lg transition-colors duration-200"
+      >
+        <PlusIcon class="w-5 h-5" />
+      </button>
     </div>
 
     <div class="p-4">
@@ -139,13 +144,15 @@ import { storeToRefs } from "pinia";
 import { auth } from "../firebase/config";
 import { useWishlistStore } from "../stores/wishlist";
 import { useDisplaySettingsStore } from "../stores/displaySettings";
-import IconButton from "../components/IconButton.vue";
 import SearchInput from "../components/library/SearchInput.vue";
 import UserProfile from "../components/UserProfile.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import WishlistCard from "../components/wishlist/WishlistCard.vue";
 import WishlistModal from "../components/wishlist/WishlistModal.vue";
 import DeleteModal from "../components/DeleteModal.vue";
+
+import SortingIcon from "../assets/icons/sorting.svg?component";
+import PlusIcon from "../assets/icons/plus.svg?component";
 
 const wishlistStore = useWishlistStore();
 

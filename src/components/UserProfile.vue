@@ -52,9 +52,9 @@
           </div>
 
           <div class="flex-1 min-w-0 relative text-left left-3">
-            <p class="font-bold truncate">
+            <p class="font-bold flex">
               {{ user?.displayName || "Пользователь" }}
-              <span class="relative left-2 text-base">✎</span>
+              <span><PenIcon class="w-6 h-6 scale-75" /></span>
             </p>
             <p class="text-sm truncate">{{ user?.email }}</p>
           </div>
@@ -374,16 +374,14 @@
           <div class="flex-1 overflow-y-auto p-6 space-y-6">
             <!-- Описание -->
             <div>
-              <h3 class="font-semibold text-lg mb-2 dark:text-white">
-                Наше приложение
-              </h3>
               <p
                 class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed"
               >
                 <b>Lynx Books</b> — это современный цифровой помощник для
-                читателей, в котором можно:<br />📚 Вести личную библиотеку и
-                список желаний <br />⏱️ Отслеживать прогресс чтения<br />👥
-                Выбирать книги для подарки
+                читателей, в котором можно:<br />
+                <div class="flex gap-1"><LibraryIcon class="w-6 h-6 scale-75" />Вести личную библиотеку и список желаний </div>
+                <div class="flex gap-1"><TrackerIcon class="w-6 h-6 scale-75" />Отслеживать прогресс чтения<br /></div>
+                <div class="flex gap-1"><CommunityIcon class="w-6 h-6 scale-75" />Выбирать книги для подарки</div>
               </p>
             </div>
 
@@ -392,14 +390,14 @@
               <h3 class="font-semibold text-lg mb-3 dark:text-white">
                 Контакты
               </h3>
-              <div class="flex space-x-2">
-                <span>💬</span>
+              <div class="flex gap-1">
+                <TelegramIcon class="w-6 h-6 scale-75 text-accent" />
                 <a
-                  href="https://t.me/JuliettaLynx"
+                  href="https://t.me/julietta_lynx"
                   target="_blank"
-                  class="text-sm text-accent hover:underline"
+                  class="text-sm mt-0.5 text-accent hover:underline"
                 >
-                  Telegram: @JuliettaLynx
+                  Telegram: @julietta_lynx
                 </a>
               </div>
             </div>
@@ -414,12 +412,13 @@
                 отзыву!
               </p>
               <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSdSlanCQfeF_4zFU9pj1IdYPxGSJBN4pGtslnWWvsdZfO4lgQ/viewform?usp=header"
+                href="https://forms.gle/fG1TnnEi2oPm1fd66"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm font-medium"
+                class="inline-flex items-center gap-1 px-1 py-1 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm font-medium"
               >
-                <span>📝</span> Оставить отзыв
+                <span> <ReviewIcon class="w-6 h-6 scale-75" /></span> Оставить
+                отзыв
               </a>
             </div>
           </div>
@@ -469,6 +468,13 @@ import { useUserStore } from "../stores/user";
 import { usersDB } from "../db/index";
 import AvatarUploader from "./AvatarUploader.vue";
 import DeleteModal from "./DeleteModal.vue";
+
+import PenIcon from "../assets/icons/pen.svg?component";
+import LibraryIcon from "../assets/icons/navigation/library.svg?component";
+import TrackerIcon from "../assets/icons/navigation/tracker.svg?component";
+import CommunityIcon from "../assets/icons/navigation/community.svg?component";
+import TelegramIcon from "../assets/icons/feedback/telegram.svg?component";
+import ReviewIcon from "../assets/icons/feedback/review.svg?component";
 
 const router = useRouter();
 const userStore = useUserStore();
