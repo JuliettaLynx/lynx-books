@@ -33,10 +33,10 @@
             />
             <button
               @click="copyLink"
-              class="w-10 py-2 text-xl dark:bg-border-dark/40 border border-border dark:border-border-dark rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark"
+              class="w-9 py-2 pl-1 text-xl dark:bg-border-dark/40 border border-border dark:border-border-dark rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark"
               title="Копировать"
             >
-              📋
+              <CopyIcon class="w-6 h-6 text-white" />
             </button>
           </div>
           <p class="text-xs text-gray-500 mt-1">
@@ -66,6 +66,7 @@
 import { ref } from "vue";
 import { useCommunityStore } from "../../stores/community";
 import CustomCheckbox from "../CustomCheckbox.vue";
+import CopyIcon from "../../assets/icons/community/copy.svg?component";
 
 const props = defineProps({ modelValue: Boolean });
 const emit = defineEmits(["update:modelValue"]);

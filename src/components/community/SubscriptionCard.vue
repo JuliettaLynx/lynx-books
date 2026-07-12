@@ -14,9 +14,9 @@
       </div>
       <button
         @click="confirmUnsubscribe"
-        class="px-1.5 py-1 ml-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
+        class="px-1.5 py-1.5 ml-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600"
       >
-        🗑
+        <BasketIcon class="w-5 h-5" />
       </button>
     </div>
 
@@ -27,8 +27,8 @@
         class="ml-12 lg:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-library')"
       >
-        <div class="font-medium flex justify-between items-center">
-          <span>📚 Библиотека</span>
+        <div class="font-medium flex gap-1 items-center text-white">
+          <LibraryIcon class="w-6 h-6 scale-75 text-border/60" />Библиотека
         </div>
         <div ref="libraryContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
           <div
@@ -81,8 +81,8 @@
         v-else
         class="ml-12 min-[700px]:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
       >
-        <div class="font-medium flex justify-between items-center">
-          <span>❌ Библиотека</span>
+        <div class="font-medium flex gap-1 items-center text-white">
+          <LibraryIcon class="w-6 h-6 scale-75 text-red-500" />Библиотека
         </div>
         <div class="hidden lg:flex py-2 px-2">
           <div class="text-sm text-gray-500">Нет доступа</div>
@@ -95,8 +95,8 @@
         class="ml-12 lg:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
         @click="$emit('open-wishlist')"
       >
-        <div class="font-medium flex justify-between items-center">
-          <span>⭐ Вишлист</span>
+        <div class="font-medium flex gap-1 items-center text-white">
+          <WishlistIcon class="w-6 h-6 scale-75 text-border/60" />Вишлист
         </div>
         <div ref="wishlistContainerRef" class="hidden lg:flex gap-2 py-2 px-2">
           <div
@@ -154,8 +154,8 @@
         v-else
         class="ml-12 lg:ml-0 border border-border dark:border-border-dark rounded-lg p-2 bg-white dark:bg-border-dark/40 dark:text-white cursor-pointer"
       >
-        <div class="font-medium flex justify-between items-center">
-          <span>❌ Вишлист</span>
+        <div class="font-medium flex gap-1 items-center text-white">
+          <WishlistIcon class="w-6 h-6 scale-75 text-red-500" />Вишлист
         </div>
         <div class="hidden lg:flex py-2 px-2">
           <div class="text-sm text-gray-500">Нет доступа</div>
@@ -179,6 +179,10 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import DeleteModal from "../DeleteModal.vue";
 import { DEFAULT_AVATAR, DEFAULT_COVER } from "../../constants/constants.js";
+
+import BasketIcon from "../../assets/icons/basket.svg?component";
+import LibraryIcon from "../../assets/icons/navigation/library.svg?component";
+import WishlistIcon from "../../assets/icons/navigation/wishlist.svg?component";
 
 const props = defineProps({
   subscription: Object,

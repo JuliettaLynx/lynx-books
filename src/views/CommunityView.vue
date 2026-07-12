@@ -4,18 +4,28 @@
     <div
       class="sticky top-0 pl-4 p-1.5 z-20 border-b border-border dark:border-border-dark bg-white dark:bg-bg-secondary-dark shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)] transition-colors duration-200"
     >
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center text-border/40">
         <SearchInput v-model="searchQuery" placeholder="Имя пользователя" />
-        <IconButton icon="⚙️" @click="privacyModalOpen = true" class="px-3" />
-        <IconButton icon="🔗" @click="shareModalOpen = true" class="pr-3" />
+        <button
+          @click="privacyModalOpen = true"
+          class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+        >
+          <PrivacyIcon class="w-6 h-6" />
+        </button>
+        <button
+          @click="shareModalOpen = true"
+          class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-border-dark transition-colors duration-150"
+        >
+          <LinkIcon class="w-6 h-6" />
+        </button>
       </div>
 
-      <IconButton
-        icon="+"
-        variant="primary"
+      <button
         @click="addModalOpen = true"
-        class="fixed z-20 right-4 bottom-20 lg:bottom-5 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center"
-      />
+        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-lg bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-bg-primary-dark shadow-lg transition-colors duration-200"
+      >
+        <PlusIcon class="w-5 h-5" />
+      </button>
     </div>
 
     <div v-if="communityStore.loading" class="text-center py-8">
@@ -90,6 +100,10 @@ import AddUserModal from "../components/community/AddUserModal.vue";
 import SubscriptionCard from "../components/community/SubscriptionCard.vue";
 import ReadonlyBookModal from "../components/community/ReadonlyBookModal.vue";
 import ExternalListView from "../components/community/ExternalListView.vue";
+
+import PlusIcon from "../assets/icons/plus.svg?component";
+import PrivacyIcon from "../assets/icons/community/privacy.svg?component";
+import LinkIcon from "../assets/icons/community/link.svg?component";
 
 const communityStore = useCommunityStore();
 const { subscriptions, loading, error } = storeToRefs(communityStore);
