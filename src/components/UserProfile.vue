@@ -379,9 +379,18 @@
               >
                 <b>Lynx Books</b> — это современный цифровой помощник для
                 читателей, в котором можно:<br />
-                <div class="flex gap-1"><LibraryIcon class="w-6 h-6 scale-75" />Вести личную библиотеку и список желаний </div>
-                <div class="flex gap-1"><TrackerIcon class="w-6 h-6 scale-75" />Отслеживать прогресс чтения<br /></div>
-                <div class="flex gap-1"><CommunityIcon class="w-6 h-6 scale-75" />Выбирать книги для подарки</div>
+                <span class="flex gap-1"
+                  ><LibraryIcon class="w-6 h-6 scale-75" />Вести личную
+                  библиотеку и список желаний
+                </span>
+                <span class="flex gap-1"
+                  ><TrackerIcon class="w-6 h-6 scale-75" />Отслеживать прогресс
+                  чтения<br
+                /></span>
+                <span class="flex gap-1"
+                  ><CommunityIcon class="w-6 h-6 scale-75" />Выбирать книги для
+                  подарки</span
+                >
               </p>
             </div>
 

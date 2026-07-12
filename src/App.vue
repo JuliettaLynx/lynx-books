@@ -9,7 +9,7 @@
         class="hidden lg:flex"
       />
 
-      <Header v-if="user" class="pl-16" />
+      <Header v-if="user" class="lg:pl-16" />
 
       <!-- Контент -->
       <div class="transition-all duration-300">
