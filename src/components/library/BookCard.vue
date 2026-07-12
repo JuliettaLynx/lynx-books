@@ -4,19 +4,17 @@
     :class="[isGrid ? 'flex' : '']"
     @click="handleCardClick"
   >
-    <div v-if="!isGrid" class="absolute top-1 right-2 z-10 h-6">
+    <div v-if="!isGrid" class="absolute top-1 right-1 z-10 h-6">
       <BookActions
         :book="book"
         :is-grid="isGrid"
         @favorite="$emit('favorite', $event)"
-        @edit="$emit('edit', $event)"
-        @delete="$emit('delete', $event)"
       />
     </div>
 
     <!-- Обложка -->
     <div
-      class="bg-purple-100 dark:bg-border-dark flex-shrink-0 relative overflow-hidden"
+      class="bg-purple-100 dark:bg-border-dark/50 flex-shrink-0 relative overflow-hidden"
       :class="
         isGrid
           ? 'w-24 rounded-l-lg'
@@ -33,20 +31,21 @@
       </div>
 
       <!-- Формат и статус (только для плиточного расположения, поверх обложки, слева снизу) -->
-      <div v-if="!isGrid" class="absolute z-10 bottom-2 left-2">
-        <span
-          class="text-xs px-2 py-1 rounded-lg text-black dark:text-white"
-          :class="{
-            'bg-green-300/80 dark:bg-green-800/80': book.status === 'прочитано',
-            'bg-yellow-300/80 dark:bg-yellow-800/80':
-              book.status === 'не прочитано',
-            'bg-red-300/80 dark:bg-red-800/80': book.status === 'брошено',
-          }"
-        >
-          <span class="text-xs py-1 dark:text-gray-300">
-            <span>{{ getFormatEmoji(book.format) }}</span>
-          </span>
-          {{ book.status }}
+      <div
+        v-if="!isGrid"
+        class="absolute flex flex-col gap-1 min-[500px]:gap-2 z-10 bottom-1 left-1 py-1 min-[500px]:py-2 text-black dark:text-white rounded-lg bg-bg-primary-dark/70 border border-border-dark"
+      >
+        <span class="px-1 min-[500px]:px-1.5">
+          <component
+            :is="getFormatIcon(book.format)"
+            class="w-5 h-5 min-[500px]:scale-125"
+          />
+        </span>
+        <span class="px-1 min-[500px]:px-1.5">
+          <component
+            :is="getStatusIcon(book.status)"
+            class="w-5 h-5 min-[500px]:scale-125"
+          />
         </span>
       </div>
 
@@ -54,12 +53,16 @@
         class="h-full relative z-0 flex items-center justify-center text-4xl"
       >
         <img v-if="book.cover" :src="book.cover" class="h-full" alt="Обложка" />
-        <span v-else>📷</span>
+        <span v-else>
+          <CameraIcon
+            class="w-14 h-14 text-border-dark/40 dark:text-border/40"
+          />
+        </span>
       </div>
     </div>
 
     <!-- Информация о книге -->
-    <div class="px-2 flex-1 relative">
+    <div class="flex-1 relative">
       <div class="flex justify-between">
         <div class="flex-1 py-1" :class="isGrid ? 'pt-4' : 'pt-2'">
           <p
@@ -77,23 +80,19 @@
           >
             {{ book.publisher }}
           </p>
-
           <!-- Формат и статус (только для списка) -->
-          <div v-if="isGrid" class="pt-3 text-center">
+          <div v-if="isGrid" class="pt-3 flex justify-center items-center">
             <span
-              class="text-xs px-2 py-1 rounded-lg"
-              :class="{
-                'bg-green-300/80 dark:bg-green-800/80':
-                  book.status === 'прочитано',
-                'bg-yellow-300/80 dark:bg-yellow-800/80':
-                  book.status === 'не прочитано',
-                'bg-red-300/80 dark:bg-red-800/80': book.status === 'брошено',
-              }"
+              class="flex gap-3 text-xs justify-center items-center py-1.5 rounded-lg w-20"
             >
-              <span class="text-sm pr-1">
-                <span>{{ getFormatEmoji(book.format) }}</span>
-              </span>
-              {{ book.status }}
+              <component
+                :is="getFormatIcon(book.format)"
+                class="w-5 h-5 min-[500px]:scale-125"
+              />
+              <component
+                :is="getStatusIcon(book.status)"
+                class="w-5 h-5 min-[500px]:scale-125"
+              />
             </span>
           </div>
 
@@ -107,24 +106,21 @@
           </div>
         </div>
 
-        <div
-          v-if="book.status === 'прочитано' && book.rating !== 0 && isGrid"
-          class="text-yellow-400 dark:text-yellow-500 flex flex-col absolute pt-2"
-        >
-          <span v-for="n in 5" :key="n" class="text-lg leading-6">
-            {{ n <= (book.rating || 0) ? "★" : "☆" }}
-          </span>
-        </div>
-
         <!-- Действия с книгой (для карточек) -->
-        <div v-if="isGrid">
+        <div v-if="isGrid" class="pt-1 pr-1">
           <BookActions
             :book="book"
             :is-grid="isGrid"
             @favorite="$emit('favorite', $event)"
-            @edit="$emit('edit', $event)"
-            @delete="$emit('delete', $event)"
           />
+          <div
+            v-if="book.status === 'прочитано' && book.rating !== 0 && isGrid"
+            class="text-yellow-400 dark:text-yellow-500 flex flex-col items-center"
+          >
+            <span v-for="n in 5" :key="n" class="text-lg leading-5">
+              {{ n <= (book.rating || 0) ? "★" : "☆" }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -133,6 +129,16 @@
 
 <script setup>
 import BookActions from "./BookActions.vue";
+import CameraIcon from "../../assets/icons/bookcard/camera.svg?component";
+import FavoriteIcon from "../../assets/icons/bookcard/favorite.svg?component";
+
+import Paper from "../../assets/icons/bookcard/paper.svg?component";
+import Electronic from "../../assets/icons/bookcard/electronic.svg?component";
+import Audio from "../../assets/icons/bookcard/audio.svg?component";
+
+import FinishedIcon from "../../assets/icons/bookcard/finished.svg?component";
+import UnfinishedIcon from "../../assets/icons/bookcard/unfinished.svg?component";
+import AbandonedIcon from "../../assets/icons/bookcard/abandoned.svg?component";
 
 const props = defineProps({
   book: {
@@ -152,13 +158,21 @@ const handleCardClick = () => {
 };
 
 // Функция для получения эмодзи в зависимости от формата
-const getFormatEmoji = (format) => {
+const getFormatIcon = (format) => {
   const formatMap = {
-    бумажная: "📖",
-    электронная: "📱",
-    аудио: "🎧",
+    бумажная: Paper,
+    электронная: Electronic,
+    аудио: Audio,
   };
+  return formatMap[format] || Paper;
+};
 
-  return formatMap[format] || "📚";
+const getStatusIcon = (status) => {
+  const formatMap = {
+    прочитано: FinishedIcon,
+    "не прочитано": UnfinishedIcon,
+    брошено: AbandonedIcon,
+  };
+  return formatMap[status] || UnfinishedIcon;
 };
 </script>
