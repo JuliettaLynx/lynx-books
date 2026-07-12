@@ -11,13 +11,12 @@
       class="sticky top-0 z-20 border-b border-border dark:border-border-dark bg-bg-secondary dark:bg-bg-secondary-dark text-black dark:text-bg-secondary shadow-[0_6px_16px_6px_rgba(71,0,102,0.1)] dark:shadow-[0_6px_16px_6px_rgba(0,0,0,0.4)] transition-colors duration-200"
     >
       <!-- Месяц с навигацией -->
-      <div class="flex items-center justify-between px-4 min-[700px]:px-5">
-        <IconButton
-          icon="←"
-          variant="default"
-          @click="prevMonth"
-          class="text-xl dark:text-white"
-        />
+      <div
+        class="flex items-center justify-between px-4 min-[700px]:px-5 text-white"
+      >
+        <button type="button" @click="prevMonth" class="text-white">
+          <ArrowIcon class="w-5 h-5 text-white" />
+        </button>
 
         <h2
           class="pb-2.5 pt-3 text-lg font-semibold dark:text-white capitalize"
@@ -25,12 +24,9 @@
           {{ currentMonthName }}
         </h2>
 
-        <IconButton
-          icon="→"
-          variant="default"
-          @click="nextMonth"
-          class="text-xl dark:text-white"
-        />
+        <button type="button" @click="nextMonth" class="text-white">
+          <ArrowIcon class="w-5 h-5 text-white scale-x-[-1]" />
+        </button>
       </div>
 
       <button
@@ -41,12 +37,12 @@
       </button>
 
       <!-- Кнопка добавления сессии -->
-      <IconButton
-        icon="+"
-        variant="primary"
-        class="fixed z-20 right-4 bottom-20 lg:bottom-5 w-14 h-14 bg-accent text-white dark:text-black rounded-full shadow-lg hover:bg-accent/60 text-2xl flex items-center justify-center transition-colors duration-200"
+      <button
         @click="openSessionModal"
-      />
+        class="fixed bottom-20 lg:bottom-5 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-lg bg-accent hover:bg-[#25917b] text-2xl text-white dark:text-bg-primary-dark shadow-lg transition-colors duration-200"
+      >
+        <PlusIcon class="w-5 h-5" />
+      </button>
     </div>
 
     <div v-if="sessionStore.error" class="p-4 text-center">
@@ -99,13 +95,15 @@
 import { ref, computed, onMounted } from "vue";
 import { auth } from "../firebase/config";
 import { useSessionStore } from "../stores/session";
-import IconButton from "../components/IconButton.vue";
 import UserProfile from "../components/UserProfile.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import CalendarGrid from "../components/tracker/CalendarGrid.vue";
 import SessionModal from "../components/tracker/SessionModal.vue";
 import DayDetailsModal from "../components/tracker/DayDetailsModal.vue";
 import YearPickerModal from "../components/tracker/YearPickerModal.vue";
+
+import ArrowIcon from "../assets/icons/arrow.svg?component";
+import PlusIcon from "../assets/icons/plus.svg?component";
 
 const SWIPE_THRESHOLD = 50;
 const MOVE_THRESHOLD = 10;

@@ -65,29 +65,27 @@
                 <!-- Дочитана -->
                 <div
                   v-if="session.finishedBook"
-                  class="text-sm text-green-600 dark:text-green-400 mt-1"
+                  class="flex gap-2 text-sm text-[#00be1c] dark:text-[#00be1c] mt-1"
                 >
-                  ✓ Книга дочитана
-                  <span v-if="session.rating">
-                    (оценка: {{ "★".repeat(session.rating) }})
-                  </span>
+                  <FinishedIcon class="w-5 h-5" />
+                  Книга дочитана
                 </div>
               </div>
 
               <div class="flex flex-col gap-1">
                 <button
                   @click="editSession(session)"
-                  class="py-1 px-1.5 text-base text-gray-400 hover:text-blue-700 dark:text-gray-300 rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark"
+                  class="py-1.5 px-1.5 text-base text-gray-400 hover:text-blue-700 dark:text-gray-300 rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark"
                   title="Редактировать"
                 >
-                  ✎
+                  <PenIcon class="w-5 h-5" />
                 </button>
                 <button
                   @click="deleteSession(session)"
-                  class="py-1 px-1.5 text-base text-red-600 hover:text-red-700 dark:text-red-400 rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark"
+                  class="py-1.5 px-1.5 text-base text-red-600 hover:text-red-700 dark:text-red-400 rounded-lg hover:bg-purple-700/10 dark:hover:bg-border-dark"
                   title="Удалить"
                 >
-                  🗑
+                  <BasketIcon class="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -129,6 +127,10 @@ import { useUserStore } from "../../stores/user";
 import ModalHeader from "../modal/ModalHeader.vue";
 import ModalActions from "../modal/ModalActions.vue";
 import SessionModal from "./SessionModal.vue";
+
+import FinishedIcon from "../../assets/icons/bookcard/finished.svg?component";
+import PenIcon from "../../assets/icons/pen.svg?component";
+import BasketIcon from "../../assets/icons/basket.svg?component";
 
 const props = defineProps({
   isOpen: {
