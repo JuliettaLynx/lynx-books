@@ -119,16 +119,17 @@
               >
                 <div class="p-2">
                   <button
-                    v-for="opt in filterOptions"
-                    :key="opt.value"
-                    @click="setFilter(opt.value)"
-                    class="w-full text-left px-3 py-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
+                    v-for="option in filterOptions"
+                    :key="option.value"
+                    @click="setFilter(option.value)"
+                    class="w-full flex gap-2 text-left pl-2 p-1.5 text-sm rounded hover:bg-purple-100 dark:hover:bg-border-dark"
                     :class="{
                       'bg-purple-200 dark:bg-accent/30':
-                        currentFilter === opt.value,
+                        currentFilter === option.value,
                     }"
                   >
-                    {{ opt.label }}
+                    <component :is="option.icon" class="w-5 h-5 text-red-600" />
+                    {{ option.label }}
                   </button>
                 </div>
               </div>
@@ -196,6 +197,11 @@ import ReadonlyBookCard from "./ReadonlyBookCard.vue";
 
 import FilterIcon from "../../assets/icons/filter.svg?component";
 import SortingIcon from "../../assets/icons/sorting.svg?component";
+import AllBooksIcon from "../../assets/icons/bookcard/allbooks.svg?component";
+import FavoriteIcon from "../../assets/icons/bookcard/favorite.svg?component";
+import FinishedIcon from "../../assets/icons/bookcard/finished.svg?component";
+import UnfinishedIcon from "../../assets/icons/bookcard/unfinished.svg?component";
+import AbandonedIcon from "../../assets/icons/bookcard/abandoned.svg?component";
 
 const props = defineProps({
   isOpen: Boolean,
@@ -285,23 +291,12 @@ const sortCategories = computed(() => {
 
 // Опции фильтра для библиотеки
 const filterOptions = [
-  { value: "all", label: "📚 Все" },
-  { value: "favorite", label: "❤️ Избранные" },
-  { value: "finished", label: "✅ Прочитано" },
-  { value: "unfinished", label: "📖 Не прочитано" },
-  { value: "abandoned", label: "❌ Брошено" },
+  { value: "all", label: "Все", icon: AllBooksIcon },
+  { value: "favorite", label: "Избранные", icon: FavoriteIcon },
+  { value: "finished", label: "Прочитано", icon: FinishedIcon },
+  { value: "unfinished", label: "Не прочитано", icon: UnfinishedIcon },
+  { value: "abandoned", label: "Брошено", icon: AbandonedIcon },
 ];
-
-// Иконка для кнопки фильтра
-const filterIcon = computed(() => {
-  const map = {
-    favorite: "❤️",
-    finished: "✅",
-    unfinished: "📖",
-    abandoned: "❌",
-  };
-  return map[currentFilter.value] || "📚";
-});
 
 // Фильтрация
 const searched = computed(() => {
