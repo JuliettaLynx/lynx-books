@@ -77,7 +77,7 @@
                     }"
                   >
                     <div class="font-medium text-gray-900 dark:text-white">
-                      {{ book.title }}
+                      {{ book.title || "—" }}
                     </div>
                     <div
                       class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
@@ -243,21 +243,14 @@
 
             <!-- Чекбокс "Книга дочитана" -->
             <div
-              class="w-full px-3 py-2.5 border border-border dark:border-border-dark rounded-lg bg-white dark:bg-border-dark/40 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 h-10 py-2 border border-border dark:border-border-dark rounded-lg bg-white dark:bg-border-dark/40 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <input
-                type="checkbox"
-                id="finishedBook"
+              <CustomCheckbox
                 v-model="form.finishedBook"
                 @change="handleFinishedBookChange"
-                class="w-4 h-4 text-accent rounded focus:ring-accent cursor-pointer"
-              />
-              <label
-                for="finishedBook"
-                class="ml-2 text-sm text-black dark:text-white cursor-pointer"
               >
-                Книга дочитана
-              </label>
+                Книга дочитана</CustomCheckbox
+              >
             </div>
           </form>
         </div>
@@ -278,6 +271,7 @@ import { useSessionStore } from "../../stores/session";
 import { useLibraryStore } from "../../stores/library";
 import ModalHeader from "../modal/ModalHeader.vue";
 import ModalActions from "../modal/ModalActions.vue";
+import CustomCheckbox from "../CustomCheckbox.vue";
 
 const props = defineProps({
   isOpen: {

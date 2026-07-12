@@ -14,19 +14,15 @@
         <div class="space-y-3">
           <label class="flex items-center justify-between">
             <span class="dark:text-gray-300">Библиотека публична</span>
-            <input
-              type="checkbox"
+            <CustomCheckbox
               v-model="localPrivacy.isLibraryPublic"
-              class="toggle"
-            />
+            ></CustomCheckbox>
           </label>
           <label class="flex items-center justify-between">
             <span class="dark:text-gray-300">Вишлист публичен</span>
-            <input
-              type="checkbox"
+            <CustomCheckbox
               v-model="localPrivacy.isWishlistPublic"
-              class="toggle"
-            />
+            ></CustomCheckbox>
           </label>
         </div>
         <div class="flex gap-2 mt-6">
@@ -57,6 +53,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { useCommunityStore } from "../../stores/community";
+import CustomCheckbox from "../CustomCheckbox.vue";
 
 const props = defineProps({
   modelValue: Boolean,
