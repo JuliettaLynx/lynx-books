@@ -1,16 +1,23 @@
 <template>
   <div
-    class="dark pl-0 lg:pl-16 pb-16 lg:pb-0 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+    class="dark pb-16 lg:pb-0 min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
   >
     <LoadingSpinner v-if="!authReady" fullscreen />
     <template v-else>
-      <Sidebar class="hidden lg:flex" />
+      <Sidebar
+        v-if="user && $route.meta.showBottomNav"
+        class="hidden lg:flex"
+      />
 
-      <Header v-if="user" />
+      <Header v-if="user" class="pl-16" />
 
       <!-- Контент -->
       <div class="transition-all duration-300">
-        <router-view />
+        <router-view
+          v-if="user && $route.meta.showBottomNav"
+          class="pl-0 lg:pl-16"
+        />
+        <router-view v-else class="pl-0" />
       </div>
 
       <!-- TabBar (только на mobile) -->
